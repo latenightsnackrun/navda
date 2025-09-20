@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import L from 'leaflet';
 
 const MapControlBar = ({ 
@@ -7,18 +7,43 @@ const MapControlBar = ({
   onRadiusChange, 
   selectedAirport, 
   aircraftData,
-  onRefresh,
-  loading,
   mapType,
   onMapTypeChange,
   showLabels,
-  onShowLabelsChange,
+  onToggleLabels,
   showTrails,
-  onShowTrailsChange,
+  onToggleTrails,
   autoCenter,
-  onAutoCenterChange
+  onToggleAutoCenter,
+  selectedAircraft,
+  onShowAircraftInfo,
+  lastUpdate,
+  loading,
+  viewMode,
+  liveUpdate,
+  onToggleLiveUpdate,
+  // 3D-specific controls
+  onFlyToAirport,
+  onResetView,
+  onZoomIn,
+  onZoomOut
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showNavigationPopup, setShowNavigationPopup] = useState(false);
+
+  // Handle ESC key for popup
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showNavigationPopup) {
+        setShowNavigationPopup(false);
+      }
+    };
+
+    if (showNavigationPopup) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showNavigationPopup]);
 
   const radiusOptions = [
     { value: 50, label: '50nm' },
@@ -116,6 +141,62 @@ const MapControlBar = ({
 
   const stats = getAircraftStats();
 
+  // Airport data for navigation
+  const airports = {
+    "KJFK": { 
+      name: "John F. Kennedy International Airport", 
+      city: "New York", 
+      lat: 40.6413, 
+      lon: -73.7781,
+      terminals: [
+        { name: "Terminal 1", lat: 40.6433, lon: -73.7810 },
+        { name: "Terminal 2", lat: 40.6419, lon: -73.7789 },
+        { name: "Terminal 4", lat: 40.6441, lon: -73.7760 },
+        { name: "Terminal 5", lat: 40.6394, lon: -73.7762 },
+        { name: "Terminal 7", lat: 40.6466, lon: -73.7812 },
+        { name: "Terminal 8", lat: 40.6477, lon: -73.7851 }
+      ],
+      runways: [
+        { name: "Runway 04L/22R", lat: 40.6320, lon: -73.7780 },
+        { name: "Runway 04R/22L", lat: 40.6390, lon: -73.7740 },
+        { name: "Runway 08L/26R", lat: 40.6490, lon: -73.7890 },
+        { name: "Runway 08R/26L", lat: 40.6530, lon: -73.7940 }
+      ]
+    },
+    "KLAX": { 
+      name: "Los Angeles International Airport", 
+      city: "Los Angeles", 
+      lat: 33.9425, 
+      lon: -118.4081,
+      terminals: [
+        { name: "Terminal 1", lat: 33.9435, lon: -118.4090 },
+        { name: "Terminal 2", lat: 33.9440, lon: -118.4095 },
+        { name: "Terminal 3", lat: 33.9445, lon: -118.4100 },
+        { name: "Terminal 4", lat: 33.9450, lon: -118.4105 },
+        { name: "Terminal 5", lat: 33.9455, lon: -118.4110 },
+        { name: "Terminal 6", lat: 33.9460, lon: -118.4115 },
+        { name: "Terminal 7", lat: 33.9415, lon: -118.4085 },
+        { name: "Terminal 8", lat: 33.9410, lon: -118.4080 }
+      ],
+      runways: [
+        { name: "Runway 06L/24R", lat: 33.9360, lon: -118.4150 },
+        { name: "Runway 06R/24L", lat: 33.9400, lon: -118.4100 },
+        { name: "Runway 07L/25R", lat: 33.9480, lon: -118.4050 },
+        { name: "Runway 07R/25L", lat: 33.9520, lon: -118.4020 }
+      ]
+    }
+    // Add more airports as needed
+  };
+
+  const currentAirport = airports[selectedAirport];
+
+  const handleNavigateToLocation = (lat, lon, zoom = 15) => {
+    if (map) {
+      map.setView([lat, lon], zoom);
+      setShowNavigationPopup(false);
+    }
+  };
+
   return (
     <div className="bg-gray-900/95 backdrop-blur-sm border-t border-gray-700">
       {/* Main Control Bar */}
@@ -155,8 +236,23 @@ const MapControlBar = ({
             </button>
           </div>
 
-          {/* Center Section - Radius Control */}
+          {/* Center Section - Navigation and Radius Control */}
           <div className="flex items-center space-x-4">
+            {/* Navigation Button */}
+            {selectedAirport && currentAirport && (
+              <button
+                onClick={() => setShowNavigationPopup(true)}
+                className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                title="Airport Navigation"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="hidden sm:inline text-sm">Navigate</span>
+              </button>
+            )}
+
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-sm">Radius:</span>
               <div className="flex space-x-1">
@@ -195,16 +291,24 @@ const MapControlBar = ({
 
           {/* Right Section - Controls */}
           <div className="flex items-center space-x-2">
+            {/* Aircraft Info Button */}
             <button
-              onClick={onRefresh}
-              disabled={loading}
-              className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition-colors flex items-center space-x-1"
+              onClick={onShowAircraftInfo}
+              className={`px-3 py-2 rounded-lg transition-colors flex items-center space-x-1 ${
+                selectedAircraft 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+              }`}
+              title={selectedAircraft ? `Aircraft Info: ${selectedAircraft.callsign}` : 'Click an aircraft to view details'}
             >
-              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="hidden sm:inline">Refresh</span>
+              <span className="hidden sm:inline">
+                {selectedAircraft ? selectedAircraft.callsign : 'Aircraft Info'}
+              </span>
             </button>
+
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -249,7 +353,7 @@ const MapControlBar = ({
                   <input
                     type="checkbox"
                     checked={showLabels}
-                    onChange={(e) => onShowLabelsChange(e.target.checked)}
+                    onChange={(e) => onToggleLabels && onToggleLabels()}
                     className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
                   />
                   <span className="text-gray-300 text-sm">Show Labels</span>
@@ -258,7 +362,7 @@ const MapControlBar = ({
                   <input
                     type="checkbox"
                     checked={showTrails}
-                    onChange={(e) => onShowTrailsChange(e.target.checked)}
+                    onChange={(e) => onToggleTrails && onToggleTrails()}
                     className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
                   />
                   <span className="text-gray-300 text-sm">Show Flight Trails</span>
@@ -267,13 +371,48 @@ const MapControlBar = ({
                   <input
                     type="checkbox"
                     checked={autoCenter}
-                    onChange={(e) => onAutoCenterChange(e.target.checked)}
+                    onChange={(e) => onToggleAutoCenter && onToggleAutoCenter()}
                     className="w-4 h-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500"
                   />
                   <span className="text-gray-300 text-sm">Auto Center</span>
                 </label>
               </div>
             </div>
+
+            {/* 3D Camera Controls */}
+            {viewMode === 'cesium' && (
+              <div>
+                <h4 className="text-white text-sm font-medium mb-2">3D Camera Controls</h4>
+                <div className="space-y-2">
+                  <button
+                    onClick={onFlyToAirport}
+                    className="w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
+                  >
+                    Fly to Airport
+                  </button>
+                  <button
+                    onClick={onResetView}
+                    className="w-full px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors"
+                  >
+                    Reset View
+                  </button>
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={onZoomIn}
+                      className="flex-1 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
+                    >
+                      Zoom In
+                    </button>
+                    <button
+                      onClick={onZoomOut}
+                      className="flex-1 px-2 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors"
+                    >
+                      Zoom Out
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Map Info */}
             <div>
@@ -302,12 +441,6 @@ const MapControlBar = ({
                 >
                   Fit All Aircraft
                 </button>
-                <button
-                  onClick={onRefresh}
-                  className="w-full text-left px-3 py-2 text-sm bg-gray-800 text-gray-300 rounded hover:bg-gray-700 transition-colors"
-                >
-                  Refresh Data
-                </button>
               </div>
             </div>
           </div>
@@ -331,6 +464,129 @@ const MapControlBar = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Navigation Popup Overlay */}
+      {showNavigationPopup && currentAirport && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[2000]"
+            onClick={() => setShowNavigationPopup(false)}
+          />
+          
+          {/* Popup Content */}
+          <div className="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[2001] bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-md text-white rounded-lg border border-gray-600/50 shadow-2xl w-full max-w-2xl mx-4">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-600/50">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-600/20 rounded-lg">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold">🗺️ Airport Navigation</h2>
+                  <p className="text-blue-300 text-sm">{currentAirport.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowNavigationPopup(false)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Terminals Section */}
+                {currentAirport.terminals && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-green-300 mb-3 flex items-center space-x-2">
+                      <span>🏢</span>
+                      <span>Terminals</span>
+                    </h3>
+                    <div className="space-y-2">
+                      {currentAirport.terminals.map((terminal, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleNavigateToLocation(terminal.lat, terminal.lon, 16)}
+                          className="w-full text-left p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg border border-gray-600/30 transition-colors"
+                        >
+                          <div className="font-medium text-white">{terminal.name}</div>
+                          <div className="text-xs text-gray-400">
+                            {terminal.lat.toFixed(4)}°, {terminal.lon.toFixed(4)}°
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Runways Section */}
+                {currentAirport.runways && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-blue-300 mb-3 flex items-center space-x-2">
+                      <span>🛬</span>
+                      <span>Runways</span>
+                    </h3>
+                    <div className="space-y-2">
+                      {currentAirport.runways.map((runway, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleNavigateToLocation(runway.lat, runway.lon, 16)}
+                          className="w-full text-left p-3 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg border border-gray-600/30 transition-colors"
+                        >
+                          <div className="font-medium text-white">{runway.name}</div>
+                          <div className="text-xs text-gray-400">
+                            {runway.lat.toFixed(4)}°, {runway.lon.toFixed(4)}°
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Actions */}
+              <div className="mt-6 pt-4 border-t border-gray-600/50">
+                <h3 className="text-lg font-semibold text-purple-300 mb-3 flex items-center space-x-2">
+                  <span>⚡</span>
+                  <span>Quick Actions</span>
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => handleNavigateToLocation(currentAirport.lat, currentAirport.lon, 12)}
+                    className="p-3 bg-gradient-to-r from-blue-600/20 to-blue-700/20 hover:from-blue-600/30 hover:to-blue-700/30 rounded-lg border border-blue-600/50 transition-colors"
+                  >
+                    <div className="font-medium text-blue-300">🏢 Airport Overview</div>
+                    <div className="text-xs text-gray-400">Full airport view</div>
+                  </button>
+                  <button
+                    onClick={() => handleFitAllAircraft()}
+                    className="p-3 bg-gradient-to-r from-green-600/20 to-green-700/20 hover:from-green-600/30 hover:to-green-700/30 rounded-lg border border-green-600/50 transition-colors"
+                  >
+                    <div className="font-medium text-green-300">✈️ All Aircraft</div>
+                    <div className="text-xs text-gray-400">Fit all in view</div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-600/50 bg-gray-800/30">
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <div>Click any location to navigate • ESC to close</div>
+                <div>{currentAirport.city}</div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

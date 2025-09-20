@@ -9,6 +9,41 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
+def icao24_to_registration(icao24):
+    """Convert ICAO24 hex code to likely registration format"""
+    if not icao24 or len(icao24) != 6:
+        return icao24
+    
+    # Convert hex to decimal for US aircraft (common pattern)
+    try:
+        hex_val = int(icao24, 16)
+        
+        # US aircraft registrations (N-numbers)
+        if 0xA00000 <= hex_val <= 0xAFFFFF:
+            # US registration pattern
+            suffix = hex_val - 0xA00000
+            if suffix < 100000:
+                return f"N{suffix}"
+            else:
+                return f"N{suffix}"
+        
+        # Canadian aircraft (C-GAAA to C-GZZZ)
+        elif 0xC00000 <= hex_val <= 0xC3FFFF:
+            suffix = hex_val - 0xC00000
+            return f"C-G{suffix:03X}"
+        
+        # UK aircraft (G-AAAA to G-ZZZZ) 
+        elif 0x400000 <= hex_val <= 0x43FFFF:
+            suffix = hex_val - 0x400000
+            return f"G-{suffix:04X}"
+        
+        # For other countries, return formatted ICAO24
+        else:
+            return icao24.upper()
+            
+    except ValueError:
+        return icao24.upper()
+
 # Airport data
 AIRPORTS = {
     "KJFK": {"name": "John F. Kennedy International Airport", "city": "New York", "lat": 40.6413, "lon": -73.7781},
@@ -69,22 +104,65 @@ def get_aircraft_data_from_api(airport_code, radius_nm=200):
         processed_aircraft = []
         for flight in aircraft_list:
             try:
+                # Extract registration from flight data or generate from ICAO24
+                registration = flight.get('r', '').strip()  # Registration field from API
+                icao24 = flight.get('hex', 'UNKNOWN')
+                
+                # If no registration, try to derive from ICAO24 (common patterns)
+                if not registration and icao24 != 'UNKNOWN':
+                    registration = icao24_to_registration(icao24)
+                
+                # Get more accurate callsign
+                callsign = flight.get('flight', '').strip()
+                if not callsign:
+                    callsign = flight.get('call', '').strip()
+                if not callsign:
+                    callsign = registration if registration else icao24
+                
+                # More precise altitude handling
+                alt_baro = flight.get('alt_baro', 0)
+                alt_geom = flight.get('alt_geom', 0)
+                altitude = alt_baro if alt_baro else alt_geom
+                if altitude == "ground":
+                    altitude = 0
+                else:
+                    altitude = float(altitude) if altitude else 0
+                
+                # Ground speed conversion (knots to m/s, then to knots for display)
+                ground_speed = float(flight.get('gs', 0)) if flight.get('gs') else 0
+                
+                # True airspeed if available
+                true_airspeed = float(flight.get('tas', 0)) if flight.get('tas') else ground_speed
+                
+                # More accurate vertical rate
+                vertical_rate = float(flight.get('baro_rate', 0)) if flight.get('baro_rate') else 0
+                
                 aircraft = {
-                    "icao24": flight.get('hex', 'UNKNOWN'),
-                    "callsign": flight.get('flight', 'UNKNOWN').strip(),
+                    "icao24": icao24,
+                    "registration": registration,
+                    "callsign": callsign,
                     "latitude": float(flight.get('lat', 0)),
                     "longitude": float(flight.get('lon', 0)),
-                    "altitude": float(flight.get('alt_baro', 0)) * 3.28084,  # Convert m to ft
-                    "velocity": float(flight.get('gs', 0)) * 0.514444,  # Convert knots to m/s
-                    "heading": float(flight.get('track', 0)),
-                    "vertical_rate": float(flight.get('baro_rate', 0)) * 0.00508,  # Convert ft/min to m/s
+                    "altitude": altitude,  # Keep in feet
+                    "velocity": ground_speed,  # Ground speed in knots
+                    "true_airspeed": true_airspeed,  # True airspeed in knots
+                    "heading": float(flight.get('track', 0)) if flight.get('track') else 0,
+                    "vertical_rate": vertical_rate,  # Feet per minute
                     "origin_country": flight.get('country', 'UNKNOWN'),
                     "on_ground": flight.get('ground', False),
                     "squawk": flight.get('squawk', 'UNKNOWN'),
-                    "spi": flight.get('spi', False)
+                    "spi": flight.get('spi', False),
+                    "category": flight.get('category', 'A0'),  # Aircraft category
+                    "emergency": flight.get('emergency', False),
+                    "alert": flight.get('alert', False),
+                    "nav_modes": flight.get('nav_modes', []),
+                    "nav_altitude_mcp": flight.get('nav_altitude_mcp', None),
+                    "nav_heading": flight.get('nav_heading', None),
+                    "timestamp": flight.get('now', 0)
                 }
                 processed_aircraft.append(aircraft)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, KeyError) as e:
+                print(f"Error processing aircraft data: {e}")
                 continue
         
         return processed_aircraft
@@ -121,19 +199,32 @@ def get_sample_aircraft_data(airport_code):
         on_ground = altitude < 2000
         velocity = random.uniform(50, 200) if on_ground else random.uniform(300, 600)
         
+        # Generate realistic registration
+        icao24_hex = f"{random.randint(0xA00000, 0xAFFFFF):06X}"
+        registration = icao24_to_registration(icao24_hex)
+        
         aircraft = {
-            "icao24": f"{random.choice(airlines)}{random.randint(100, 999)}",
+            "icao24": icao24_hex,
+            "registration": registration,
             "callsign": f"{random.choice(airlines)}{random.randint(100, 999)}",
             "latitude": lat + offset_lat,
             "longitude": lon + offset_lon,
             "altitude": altitude,
             "velocity": velocity,
+            "true_airspeed": velocity * random.uniform(0.95, 1.05),
             "heading": random.uniform(0, 360),
             "vertical_rate": random.uniform(-3000, 3000) if not on_ground else 0,
             "origin_country": random.choice(countries),
             "on_ground": on_ground,
             "squawk": f"{random.randint(1000, 7777)}",
-            "spi": False
+            "spi": False,
+            "category": random.choice(['A1', 'A2', 'A3', 'A4', 'A5']),
+            "emergency": False,
+            "alert": False,
+            "nav_modes": [],
+            "nav_altitude_mcp": random.randint(20000, 40000) if not on_ground else None,
+            "nav_heading": random.randint(0, 360) if not on_ground else None,
+            "timestamp": int(datetime.now().timestamp())
         }
         aircraft_data.append(aircraft)
     

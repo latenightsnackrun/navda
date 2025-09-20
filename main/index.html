@@ -6,8 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Avivato ATC</title>
     <script src="//cdn.jsdelivr.net/npm/globe.gl"></script>
-    <script src="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Cesium.js"></script>
-    <link href="https://cesium.com/downloads/cesiumjs/releases/1.119/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.133/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script>
+      // Ensure Cesium is loaded before React components try to use it
+      window.addEventListener('load', function() {
+        console.log('Cesium loaded:', typeof window.Cesium !== 'undefined');
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
