@@ -5,6 +5,8 @@ const FlightInfoAssistant = ({ isOpen, onToggle, flightStrips = [], columns = []
   const [question, setQuestion] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState(null);
 
   const getCurrentStripsData = () => {
     if (!flightStrips.length || !columns.length) return 'No flight strips currently loaded.';
@@ -214,6 +216,67 @@ MANDATORY: If this contains a callsign and ATC command, you MUST call the approp
     }
   };
 
+  const initializeSpeechRecognition = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      return null;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      console.log('Speech recognition started');
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      console.log('Speech recognition result:', transcript);
+      setQuestion(transcript);
+      setIsRecording(false);
+      
+      // Auto-send the transcribed text
+      setTimeout(() => {
+        handleAskQuestion();
+      }, 100);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      setIsRecording(false);
+      alert(`Speech recognition error: ${event.error}`);
+    };
+
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
+      setIsRecording(false);
+    };
+
+    return recognition;
+  };
+
+  const handleVoiceRecord = () => {
+    if (isRecording) {
+      // Stop recording
+      if (recognition) {
+        recognition.stop();
+      }
+      setIsRecording(false);
+    } else {
+      // Start recording
+      const newRecognition = initializeSpeechRecognition();
+      if (newRecognition) {
+        setRecognition(newRecognition);
+        newRecognition.start();
+      }
+    }
+  };
+
   return (
     <div className={`fixed right-0 top-0 h-full bg-gray-900 border-l border-gray-700 transform transition-transform duration-300 ease-in-out z-40 ${
       isOpen ? 'translate-x-0' : 'translate-x-full'
@@ -257,12 +320,33 @@ MANDATORY: If this contains a callsign and ATC command, you MUST call the approp
         {/* Input Area */}
         <div className="p-4 border-t border-gray-700">
           <div className="flex space-x-2">
+            <button
+              onClick={handleVoiceRecord}
+              disabled={loading}
+              className={`px-3 py-2 rounded-lg transition-colors ${
+                isRecording 
+                  ? 'bg-red-600 hover:bg-red-700 text-white' 
+                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={isRecording ? 'Stop recording' : 'Start voice recording'}
+            >
+              {isRecording ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 6h12v12H6z"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                  <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+              )}
+            </button>
             <div className="flex-1 relative">
               <textarea
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Ask about flight information organization..."
+                placeholder="Ask about flight information organization or give ATC commands..."
                 className="w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2 pr-12 focus:outline-none focus:border-blue-500 resize-none"
                 rows={3}
                 disabled={loading}
