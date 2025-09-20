@@ -7,6 +7,8 @@ import Sidebar from '../components/Sidebar';
 import ParametersBar from '../components/ParametersBar';
 import TopNavigation from '../components/TopNavigation';
 import FlightStripsView from '../components/FlightStripsView';
+import WatchlistTab from '../components/WatchlistTab';
+import GlobeLandingPage from '../components/GlobeLandingPage';
 
 const Home = () => {
   const [selectedAirport, setSelectedAirport] = useState('');
@@ -18,6 +20,7 @@ const Home = () => {
   const [liveUpdate, setLiveUpdate] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [activeTab, setActiveTab] = useState('control');
+  const [showLandingPage, setShowLandingPage] = useState(true);
 
   const fetchAircraftData = async (airportCode, radiusValue = radius) => {
     if (!airportCode) {
@@ -48,7 +51,18 @@ const Home = () => {
 
   const handleAirportChange = async (airportCode) => {
     setSelectedAirport(airportCode);
+    setShowLandingPage(false); // Hide landing page when airport is selected
     await fetchAircraftData(airportCode);
+  };
+
+  const handleEnterDashboard = () => {
+    setShowLandingPage(false);
+  };
+
+  const handleBackToLanding = () => {
+    setShowLandingPage(true);
+    setSelectedAirport('');
+    setAircraftData([]);
   };
 
   const handleRadiusChange = async (newRadius) => {
@@ -116,6 +130,15 @@ const Home = () => {
     switch (activeTab) {
       case 'tickets':
         return <FlightStripsView />;
+      case 'watchlist':
+        return (
+          <div className="flex-1">
+            <WatchlistTab 
+              aircraftData={aircraftData}
+              selectedAirport={selectedAirport}
+            />
+          </div>
+        );
       case 'control':
       default:
         return (
@@ -148,12 +171,18 @@ const Home = () => {
     }
   };
 
+  // Show landing page if no airport is selected and we're on the landing page
+  if (showLandingPage && !selectedAirport) {
+    return <GlobeLandingPage onEnterDashboard={handleEnterDashboard} />;
+  }
+
   return (
     <div className="h-screen bg-black flex flex-col">
       {/* Top Navigation */}
       <TopNavigation 
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onBackToLanding={handleBackToLanding}
       />
 
       {/* Main Content Area */}

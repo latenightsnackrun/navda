@@ -1,0 +1,8 @@
+2025-09-20 17:37:57,811 - avivato_atc - ERROR - cerebras_ai - Failed to initialize Cerebras AI service: 1 validation error for ChatOpenAI
+  Value error, Did not find openai_api_key, please add an environment variable `OPENAI_API_KEY` which contains it, or pass `openai_api_key` as a named parameter. [type=value_error, input_value={'temperature': 0.3, 'ope...ne, 'http_client': None}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/value_error | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-20 17:37:57,812 - avivato_atc - ERROR - ai_analysis - Aircraft analysis failed: 1 validation error for ChatOpenAI
+  Value error, Did not find openai_api_key, please add an environment variable `OPENAI_API_KEY` which contains it, or pass `openai_api_key` as a named parameter. [type=value_error, input_value={'temperature': 0.3, 'ope...ne, 'http_client': None}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/value_error | {"component": "ai_analysis", "correlation_id": null, "data": null}
+2025-09-20 17:43:22,142 - avivato_atc - ERROR - ai_analysis - Aircraft analysis failed: 'str' object has no attribute 'isoformat' | {"component": "ai_analysis", "correlation_id": null, "data": null}
+2025-09-20 17:43:51,751 - avivato_atc - ERROR - ai_analysis - Aircraft analysis failed: 'str' object has no attribute 'isoformat' | {"component": "ai_analysis", "correlation_id": null, "data": null}

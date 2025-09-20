@@ -16,6 +16,7 @@ from services.aircraft_tracking import AircraftTrackingService
 from services.websocket_service import WebSocketService
 from services.agent_coordinator import AgentCoordinator
 from services.logging_service import logging_service, LogLevel
+from services.simple_ai_service import simple_ai_service
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -710,6 +711,164 @@ def get_system_health():
             "data": health
         })
     except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+# AI Analysis Endpoints
+@app.route('/api/ai/analyze-aircraft', methods=['POST'])
+def analyze_aircraft():
+    """Analyze aircraft behavior using Cerebras AI"""
+    try:
+        data = request.get_json()
+        aircraft_data = data.get('aircraft', {})
+        context = data.get('context', {})
+        
+        if not aircraft_data:
+            return jsonify({
+                "success": False,
+                "error": "Aircraft data is required"
+            }), 400
+        
+        # Run async analysis
+        import asyncio
+        
+        # Create new event loop for this request
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            analysis = loop.run_until_complete(
+                simple_ai_service.analyze_aircraft_behavior(aircraft_data, context)
+            )
+            
+            # Convert to dict for JSON serialization
+            analysis_dict = {
+                "status": analysis.status,
+                "summary": analysis.summary,
+                "concerns": analysis.concerns,
+                "recommendations": analysis.recommendations,
+                "confidence": analysis.confidence,
+                "metrics": analysis.metrics,
+                "timestamp": analysis.timestamp
+            }
+            
+            return jsonify({
+                "success": True,
+                "data": analysis_dict
+            })
+            
+        finally:
+            loop.close()
+        
+    except Exception as e:
+        logging_service.log(LogLevel.ERROR, "ai_analysis", f"Aircraft analysis failed: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/ai/process-query', methods=['POST'])
+def process_natural_language_query():
+    """Process natural language queries about aircraft data"""
+    try:
+        data = request.get_json()
+        query = data.get('query', '')
+        aircraft_data = data.get('aircraft_data', [])
+        context = data.get('context', {})
+        
+        if not query:
+            return jsonify({
+                "success": False,
+                "error": "Query is required"
+            }), 400
+        
+        # Run async query processing
+        import asyncio
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            result = loop.run_until_complete(
+                simple_ai_service.process_natural_language_query(query, aircraft_data, context)
+            )
+            
+            # Convert to dict for JSON serialization
+            result_dict = {
+                "query_type": result.query_type,
+                "response": result.response,
+                "filtered_aircraft": result.filtered_aircraft,
+                "total_matches": result.total_matches,
+                "insights": result.insights,
+                "recommendations": result.recommendations
+            }
+            
+            return jsonify({
+                "success": True,
+                "data": result_dict
+            })
+            
+        finally:
+            loop.close()
+        
+    except Exception as e:
+        logging_service.log(LogLevel.ERROR, "ai_analysis", f"Query processing failed: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+@app.route('/api/ai/generate-summary', methods=['POST'])
+def generate_incident_summary():
+    """Generate incident summary for aircraft"""
+    try:
+        data = request.get_json()
+        aircraft_data = data.get('aircraft', {})
+        analysis_data = data.get('analysis', {})
+        
+        if not aircraft_data or not analysis_data:
+            return jsonify({
+                "success": False,
+                "error": "Aircraft data and analysis are required"
+            }), 400
+        
+        # Create analysis object from dict
+        from services.simple_ai_service import AircraftAnalysis, AircraftStatusEnum
+        
+        analysis = AircraftAnalysis(
+            status=AircraftStatusEnum(analysis_data.get('status', 'normal')),
+            summary=analysis_data.get('summary', ''),
+            concerns=analysis_data.get('concerns', []),
+            recommendations=analysis_data.get('recommendations', []),
+            confidence=analysis_data.get('confidence', 0.5)
+        )
+        
+        # Run async summary generation
+        import asyncio
+        
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            summary = loop.run_until_complete(
+                simple_ai_service.generate_incident_summary(aircraft_data, analysis)
+            )
+            
+            return jsonify({
+                "success": True,
+                "data": {
+                    "summary": summary,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
+            })
+            
+        finally:
+            loop.close()
+        
+    except Exception as e:
+        logging_service.log(LogLevel.ERROR, "ai_analysis", f"Summary generation failed: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)

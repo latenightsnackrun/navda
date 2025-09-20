@@ -5,6 +5,11 @@ html {
   font-family: 'Inter', system-ui, sans-serif;
 }
 
+/* Globe.gl requirements */
+body {
+  margin: 0;
+}
+
 /* Custom scrollbar for dark theme */
 ::-webkit-scrollbar {
   width: 8px;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const TopNavigation = ({ activeTab, onTabChange }) => {
+const TopNavigation = ({ activeTab, onTabChange, onBackToLanding }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const tabs = [
@@ -13,6 +13,11 @@ const TopNavigation = ({ activeTab, onTabChange }) => {
       id: 'tickets', 
       name: 'Flight Strips', 
       description: 'Digital flight progress strips'
+    },
+    { 
+      id: 'watchlist', 
+      name: 'Watchlist', 
+      description: 'Aircraft behavior monitoring'
     }
   ];
 
@@ -22,6 +27,18 @@ const TopNavigation = ({ activeTab, onTabChange }) => {
         <div className="flex items-center justify-between">
           {/* Logo Section */}
           <div className="flex items-center space-x-8">
+            {onBackToLanding && (
+              <button
+                onClick={onBackToLanding}
+                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
+                title="Back to Global View"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span className="text-sm">Global View</span>
+              </button>
+            )}
             <div className="flex items-center space-x-3">
               {/* Avivato Logo */}
               <div className="flex items-center space-x-2">
