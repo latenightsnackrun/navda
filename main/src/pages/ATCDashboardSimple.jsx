@@ -11,7 +11,7 @@ const ATCDashboardSimple = () => {
     setLoading(true);
     try {
       // Test aircraft data
-      const aircraftResponse = await fetch('http://localhost:5005/api/atc/aircraft?min_lat=40&max_lat=50&min_lon=-10&max_lon=10');
+      const aircraftResponse = await fetch('http://localhost:5001/api/atc/aircraft?min_lat=40&max_lat=50&min_lon=-10&max_lon=10');
       const aircraftData = await aircraftResponse.json();
       
       if (aircraftData.success) {
@@ -21,7 +21,7 @@ const ATCDashboardSimple = () => {
       }
 
       // Test conflict data
-      const conflictResponse = await fetch('http://localhost:5005/api/atc/conflicts?min_lat=40&max_lat=50&min_lon=-10&max_lon=10');
+      const conflictResponse = await fetch('http://localhost:5001/api/atc/conflicts?min_lat=40&max_lat=50&min_lon=-10&max_lon=10');
       const conflictData = await conflictResponse.json();
       
       if (conflictData.success) {

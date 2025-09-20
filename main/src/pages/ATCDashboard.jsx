@@ -30,7 +30,7 @@ const ATCDashboard = () => {
         max_lon: sector.max_lon
       });
       
-      const response = await fetch(`http://localhost:5005/api/atc/aircraft?${params}`);
+      const response = await fetch(`http://localhost:5001/api/atc/aircraft?${params}`);
       const data = await response.json();
       
       if (data.success) {
@@ -55,7 +55,7 @@ const ATCDashboard = () => {
         max_lon: sector.max_lon
       });
       
-      const response = await fetch(`http://localhost:5005/api/atc/conflicts?${params}`);
+      const response = await fetch(`http://localhost:5001/api/atc/conflicts?${params}`);
       const data = await response.json();
       
       if (data.success) {

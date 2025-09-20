@@ -1,262 +1,563 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  useDroppable,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { motion, AnimatePresence } from 'framer-motion';
+import FlightInfoAssistant from './FlightInfoAssistant';
 
+// Individual Flight Strip Component
+const FlightStrip = ({ strip, onEdit, isDragging = false }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging: isSortableDragging,
+  } = useSortable({ id: strip.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  return (
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`relative cursor-grab active:cursor-grabbing select-none ${
+        isDragging || isSortableDragging ? 'z-50' : 'z-10'
+      }`}
+      style={{
+        ...style,
+        width: '300px',
+        height: '85px',
+        fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+        fontSize: '8px',
+        lineHeight: '1.0',
+        background: '#fefefe',
+        border: '1px solid #d1d5db',
+        position: 'relative',
+      }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      layout
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+    >
+      {/* Faint light blue grid background */}
+      <div 
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, #87ceeb 0.5px, transparent 0.5px),
+            linear-gradient(to bottom, #87ceeb 0.5px, transparent 0.5px)
+          `,
+          backgroundSize: '8px 8px',
+        }}
+      />
+
+      {/* Strip Rack Margin with Ticks */}
+      <div className="absolute left-0 top-0 w-1.5 h-full border-r border-gray-200">
+        <div className="absolute top-1 left-0.5 w-0.5 h-0.5 bg-gray-300"></div>
+        <div className="absolute top-2.5 left-0.5 w-0.5 h-0.5 bg-gray-300"></div>
+        <div className="absolute top-4 left-0.5 w-0.5 h-0.5 bg-gray-300"></div>
+        <div className="absolute top-5.5 left-0.5 w-0.5 h-0.5 bg-gray-300"></div>
+        <div className="absolute top-7 left-0.5 w-0.5 h-0.5 bg-gray-300"></div>
+        <div className="absolute top-8.5 left-0.5 w-0.5 h-0.5 bg-gray-300"></div>
+      </div>
+
+      {/* Main Content */}
+      <div className="pl-2 pr-1 py-1 h-full flex flex-col">
+        {/* Top Row: Callsign + Aircraft */}
+        <div className="flex justify-between items-center h-4 border-b border-blue-200">
+          <span className="text-black uppercase tracking-wide text-xs">{strip.callsign}</span>
+          <span className="text-gray-700 uppercase text-xs">{strip.aircraft}</span>
+        </div>
+
+        {/* Second Row: Squawk + Altitude */}
+        <div className="flex justify-between items-center h-4 border-b border-blue-200 px-2">
+          <div className="border border-gray-300 px-0.5 py-0 text-xs w-6 h-4 flex items-center justify-center">
+            {strip.squawk}
+          </div>
+          <div className="border border-gray-300 px-0.5 py-0 text-xs w-6 h-4 flex items-center justify-center">
+            {strip.altitude}
+          </div>
+        </div>
+
+        {/* Third Row: Route + ETA */}
+        <div className="h-4 border-b border-blue-200 flex items-center justify-between">
+          <span className="text-black uppercase text-xs flex-1 text-center">{truncateText(strip.route, 20)}</span>
+          <span className="text-gray-700 text-xs ml-2">{strip.eta || '--:--'}</span>
+        </div>
+
+        {/* Fourth Row: Route/Fixes */}
+        <div className="h-4 flex items-center">
+          <span className="text-gray-600 text-xs uppercase">
+            {truncateText(strip.fixes, 30)}
+          </span>
+        </div>
+
+        {/* Fifth Row: Special Notes - small red text, bottom row */}
+        {strip.notes && (
+          <div className="h-4 flex items-center">
+            <span className="text-red-600 text-xs uppercase">
+              {truncateText(strip.notes, 30)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Click overlay for editing */}
+      <div
+        className="absolute inset-0 cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit(strip);
+        }}
+      />
+    </motion.div>
+  );
+};
+
+// TRACON Dot Component
+const TraconDot = ({ strip, onRemove }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onRemove(strip.id);
+    }, 10000); // 10 seconds
+
+    return () => clearTimeout(timer);
+  }, [strip.id, onRemove]);
+
+  return (
+    <motion.div
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0, opacity: 0 }}
+      className="flex items-center justify-center h-8 w-8 mx-auto"
+    >
+      <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-red-300 shadow-lg">
+        <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+      </div>
+      <div className="ml-2 text-xs text-gray-400 font-mono">
+        {strip.callsign}
+      </div>
+    </motion.div>
+  );
+};
+
+// Column Component
+const StripColumn = ({ column, strips, onEdit, onRemoveTracon }) => {
+  const isTracon = column.id === 'tracon';
+  const { setNodeRef } = useDroppable({
+    id: column.id,
+  });
+  
+  return (
+    <div 
+      ref={setNodeRef}
+      className={`flex-shrink-0 ${isTracon ? 'w-48' : 'w-80'} bg-gray-100 rounded-lg border border-gray-200 shadow-sm`}
+    >
+      {/* Column Header */}
+      <div className="p-4 border-b border-gray-300">
+        <h3 className="text-lg font-bold text-gray-800">{column.name}</h3>
+        <div className="text-sm text-gray-600 mt-1">
+          {isTracon ? `${strips.length} dots` : `${strips.length} strips`}
+        </div>
+      </div>
+
+      {/* Strips Container */}
+      <div className="p-3 space-y-2 min-h-96 flex flex-col items-center">
+        <SortableContext items={strips.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          <AnimatePresence>
+            {strips.map((strip) => (
+              isTracon ? (
+                <TraconDot
+                  key={strip.id}
+                  strip={strip}
+                  onRemove={onRemoveTracon}
+                />
+              ) : (
+                <FlightStrip
+                  key={strip.id}
+                  strip={strip}
+                  onEdit={onEdit}
+                />
+              )
+            ))}
+          </AnimatePresence>
+        </SortableContext>
+
+        {/* Empty State */}
+        {strips.length === 0 && (
+          <div className="text-center text-gray-500 text-sm py-8">
+            {isTracon ? 'Dots appear here' : 'Drop strips here'}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Main Component
 const FlightStripsView = () => {
-  const [selectedSector, setSelectedSector] = useState('approach');
-  const [filterStatus, setFilterStatus] = useState('all');
-
-  // Sample flight strips data
-  const flightStrips = [
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [strips, setStrips] = useState([
     {
       id: 1,
       callsign: 'AAL1234',
       aircraft: 'B737',
-      departure: 'KJFK',
-      arrival: 'KLAX',
-      altitude: 35000,
-      speed: 480,
-      route: 'KJFK..KLAX',
       squawk: '1234',
-      status: 'enroute',
-      sector: 'approach',
-      estimate: '14:25',
-      remarks: 'Request direct BAYST'
+      altitude: 'FL350',
+      route: 'KJFK → KLAX',
+      fixes: 'JFK..BAYST..LAX',
+      eta: '14:25',
+      notes: 'Request direct BAYST',
+      column: 'clearance'
     },
     {
       id: 2,
       callsign: 'UAL5678',
       aircraft: 'A320',
-      departure: 'KORD',
-      arrival: 'KJFK',
-      altitude: 12000,
-      speed: 250,
-      route: 'KORD..KJFK',
       squawk: '5678',
-      status: 'descending',
-      sector: 'approach',
-      estimate: '14:30',
-      remarks: 'ILS RWY 04L'
+      altitude: 'FL120',
+      route: 'KORD → KJFK',
+      fixes: 'ORD..JFK',
+      eta: '14:30',
+      notes: 'ILS RWY 04L',
+      column: 'ground'
     },
     {
       id: 3,
       callsign: 'DLH456',
       aircraft: 'B777',
-      departure: 'EDDF',
-      arrival: 'KJFK',
-      altitude: 8000,
-      speed: 180,
-      route: 'EDDF..KJFK',
       squawk: '0456',
-      status: 'final',
-      sector: 'tower',
-      estimate: '14:22',
-      remarks: 'Heavy, RWY 04L'
+      altitude: 'FL080',
+      route: 'EDDF → KJFK',
+      fixes: 'FRA..JFK',
+      eta: '14:22',
+      notes: 'Heavy, RWY 04L',
+      column: 'tower'
+    },
+    {
+      id: 4,
+      callsign: 'SWA789',
+      aircraft: 'B737',
+      squawk: '0789',
+      altitude: 'FL250',
+      route: 'KDFW → KLAX',
+      fixes: 'DFW..LAX',
+      eta: '15:45',
+      notes: 'Request higher',
+      column: 'departure'
+    },
+    {
+      id: 5,
+      callsign: 'JBU234',
+      aircraft: 'A320',
+      squawk: '0234',
+      altitude: 'FL180',
+      route: 'KJFK → KBOS',
+      fixes: 'JFK..BOS',
+      eta: '13:15',
+      notes: 'Weather deviation',
+      column: 'tracon'
     }
+  ]);
+
+  const [editingStrip, setEditingStrip] = useState(null);
+  const [editNotes, setEditNotes] = useState('');
+  const [activeId, setActiveId] = useState(null);
+
+  const columns = [
+    { id: 'clearance', name: 'Clearance Delivery' },
+    { id: 'ground', name: 'Ground Control' },
+    { id: 'tower', name: 'Local Control' },
+    { id: 'departure', name: 'Flight Data Coor.' },
+    { id: 'tracon', name: 'TRACON Handoff' }
   ];
 
-  const sectors = [
-    { id: 'approach', name: 'Approach' },
-    { id: 'departure', name: 'Departure' },
-    { id: 'tower', name: 'Tower' },
-    { id: 'ground', name: 'Ground' }
-  ];
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'enroute': return 'bg-blue-500';
-      case 'descending': return 'bg-yellow-500';
-      case 'final': return 'bg-red-500';
-      case 'landed': return 'bg-green-500';
-      case 'taxiing': return 'bg-purple-500';
-      default: return 'bg-gray-500';
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    // Find the active strip
+    const activeStrip = strips.find(strip => strip.id === activeId);
+    if (!activeStrip) return;
+
+    // Check if we're dropping on a column (overId is a column id)
+    const targetColumn = columns.find(col => col.id === overId);
+    
+    if (targetColumn) {
+      // Dropping on a column - move strip to that column
+      setStrips(prevStrips =>
+        prevStrips.map(strip =>
+          strip.id === activeId
+            ? { ...strip, column: targetColumn.id }
+            : strip
+        )
+      );
+    } else {
+      // Dropping on another strip - reorder within the same column
+      const overStrip = strips.find(strip => strip.id === overId);
+      if (overStrip && activeStrip.column === overStrip.column) {
+        const oldIndex = strips.findIndex((item) => item.id === activeId);
+        const newIndex = strips.findIndex((item) => item.id === overId);
+        setStrips(arrayMove(strips, oldIndex, newIndex));
+      }
     }
   };
 
-  const filteredStrips = flightStrips.filter(strip => 
-    (selectedSector === 'all' || strip.sector === selectedSector) &&
-    (filterStatus === 'all' || strip.status === filterStatus)
-  );
+  const handleEditStrip = (strip) => {
+    setEditingStrip(strip);
+    setEditNotes(strip.notes || '');
+  };
+
+  const handleSaveNotes = () => {
+    if (editingStrip) {
+      setStrips(prevStrips =>
+        prevStrips.map(strip =>
+          strip.id === editingStrip.id
+            ? { ...strip, notes: editNotes }
+            : strip
+        )
+      );
+      setEditingStrip(null);
+      setEditNotes('');
+    }
+  };
+
+  const handleUpdateStripNotes = (callsign, note) => {
+    setStrips(prevStrips =>
+      prevStrips.map(strip =>
+        strip.callsign.toUpperCase() === callsign.toUpperCase()
+          ? { ...strip, notes: note }
+          : strip
+      )
+    );
+  };
+
+  const handleUpdateStripSquawk = (callsign, squawk) => {
+    setStrips(prevStrips =>
+      prevStrips.map(strip =>
+        strip.callsign.toUpperCase() === callsign.toUpperCase()
+          ? { ...strip, squawk: squawk }
+          : strip
+      )
+    );
+  };
+
+  const handleCancelEdit = () => {
+    setEditingStrip(null);
+    setEditNotes('');
+  };
+
+  const handleRemoveTracon = (stripId) => {
+    setStrips(prevStrips => prevStrips.filter(strip => strip.id !== stripId));
+  };
+
+  // Auto-save notes as user types
+  useEffect(() => {
+    if (editingStrip && editNotes !== editingStrip.notes) {
+      const timeoutId = setTimeout(() => {
+        setStrips(prevStrips =>
+          prevStrips.map(strip =>
+            strip.id === editingStrip.id
+              ? { ...strip, notes: editNotes }
+              : strip
+          )
+        );
+      }, 500); // Auto-save after 500ms of no typing
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [editNotes, editingStrip]);
+
+  const getStripsForColumn = (columnId) => {
+    return strips.filter(strip => strip.column === columnId);
+  };
+
+  const activeStrip = strips.find(strip => strip.id === activeId);
 
   return (
-    <div className="h-full bg-black flex flex-col">
+    <div className="h-full bg-black flex flex-col relative">
       {/* Header */}
-      <div className="bg-gray-900/50 border-b border-gray-800 p-6">
+      <div className="bg-gray-900/50 border-b border-gray-800 p-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-white tracking-tight">Flight Progress Strips</h1>
-            <p className="text-gray-400 mt-1">Digital replacement for paper flight progress strips</p>
+            <p className="text-gray-400 mt-1">FAA-style digital flight progress strips with drag & drop workflow</p>
           </div>
-          <div className="flex items-center space-x-4">
-            {/* Sector Filter */}
-            <div className="flex items-center space-x-2">
-              <label className="text-gray-400 text-sm">Sector:</label>
-              <select
-                value={selectedSector}
-                onChange={(e) => setSelectedSector(e.target.value)}
-                className="bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="all">All Sectors</option>
-                {sectors.map(sector => (
-                  <option key={sector.id} value={sector.id}>{sector.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Filter */}
-            <div className="flex items-center space-x-2">
-              <label className="text-gray-400 text-sm">Status:</label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-gray-800 text-white px-3 py-2 rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
-              >
-                <option value="all">All Status</option>
-                <option value="enroute">En Route</option>
-                <option value="descending">Descending</option>
-                <option value="final">Final Approach</option>
-                <option value="landed">Landed</option>
-                <option value="taxiing">Taxiing</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Sector Tabs */}
-      <div className="bg-gray-900/30 border-b border-gray-800 px-6">
-        <div className="flex space-x-1">
           <button
-            onClick={() => setSelectedSector('all')}
-            className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-              selectedSector === 'all'
-                ? 'text-white border-white'
-                : 'text-gray-400 border-transparent hover:text-white hover:border-gray-600'
-            }`}
+            onClick={() => setIsAssistantOpen(!isAssistantOpen)}
+            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            All Sectors
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm font-medium">Ask Assistant</span>
           </button>
-          {sectors.map(sector => (
-            <button
-              key={sector.id}
-              onClick={() => setSelectedSector(sector.id)}
-              className={`px-6 py-3 text-sm font-medium transition-colors border-b-2 ${
-                selectedSector === sector.id
-                  ? 'text-white border-white'
-                  : 'text-gray-400 border-transparent hover:text-white hover:border-gray-600'
-              }`}
+        </div>
+      </div>
+
+      {/* Kanban Board */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className={`flex-1 flex overflow-x-auto p-6 space-x-6 transition-all duration-300 ${
+          isAssistantOpen ? 'pr-96' : ''
+        }`}>
+          {columns.map(column => (
+            <StripColumn
+              key={column.id}
+              column={column}
+              strips={getStripsForColumn(column.id)}
+              onEdit={handleEditStrip}
+              onRemoveTracon={handleRemoveTracon}
+            />
+          ))}
+                </div>
+
+        <DragOverlay>
+          {activeStrip ? (
+            <motion.div
+              initial={{ scale: 1 }}
+              animate={{ scale: 1.05 }}
+              className="shadow-2xl"
             >
-              {sector.name}
-            </button>
-          ))}
-        </div>
-      </div>
+              <FlightStrip strip={activeStrip} isDragging={true} />
+            </motion.div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
-      {/* Flight Strips */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="space-y-4">
-          {filteredStrips.map((strip) => (
-            <div key={strip.id} className="bg-gray-900 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
-              {/* Strip Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-700">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-4 h-4 rounded ${getStatusColor(strip.status)}`}></div>
-                  <div className="text-xl font-mono font-bold text-white">{strip.callsign}</div>
-                  <div className="text-gray-400">{strip.aircraft}</div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <div className="text-white font-semibold">EST: {strip.estimate}</div>
-                    <div className="text-gray-400 text-sm capitalize">{strip.status}</div>
-                  </div>
-                  <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Strip Content */}
-              <div className="p-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  <div>
-                    <div className="text-gray-400 text-xs uppercase tracking-wide">Route</div>
-                    <div className="text-white font-mono">{strip.departure} → {strip.arrival}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 text-xs uppercase tracking-wide">Altitude</div>
-                    <div className="text-white font-mono">{strip.altitude.toLocaleString()}'</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 text-xs uppercase tracking-wide">Speed</div>
-                    <div className="text-white font-mono">{strip.speed} kts</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 text-xs uppercase tracking-wide">Squawk</div>
-                    <div className="text-white font-mono">{strip.squawk}</div>
-                  </div>
-                </div>
-
-                {/* Route Details */}
-                <div className="mb-4">
-                  <div className="text-gray-400 text-xs uppercase tracking-wide mb-1">Route</div>
-                  <div className="text-gray-300 font-mono text-sm">{strip.route}</div>
-                </div>
-
-                {/* Remarks */}
-                {strip.remarks && (
-                  <div className="mb-4">
-                    <div className="text-gray-400 text-xs uppercase tracking-wide mb-1">Remarks</div>
-                    <div className="text-yellow-300 text-sm">{strip.remarks}</div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex items-center space-x-2">
-                  <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
-                    Contact
-                  </button>
-                  <button className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
-                    Clear
-                  </button>
-                  <button className="px-3 py-1 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors">
-                    Amend
-                  </button>
-                  <button className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors">
-                    Hold
-                  </button>
+      {/* Edit Modal */}
+      <AnimatePresence>
+        {editingStrip && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-800 rounded-lg p-6 w-96 max-w-md"
+            >
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Edit Strip: {editingStrip.callsign}
+              </h3>
+              
+              <div className="mb-4">
+                <label className="block text-sm text-gray-400 mb-2">
+                  Special Notes:
+                </label>
+                <textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  className="w-full bg-gray-700 text-white border border-gray-600 rounded px-3 py-2 focus:outline-none focus:border-blue-500 font-mono text-sm"
+                  rows={4}
+                  placeholder="Enter special notes..."
+                  autoFocus
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  Auto-saves as you type
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
 
-        {filteredStrips.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-lg mb-2">No flight strips found</div>
-            <div className="text-gray-500">Try adjusting your filters or check back later</div>
-          </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                  </button>
+                <button
+                  onClick={handleSaveNotes}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Save
+                  </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
+
+      {/* Flight Info Assistant Side Panel */}
+      <FlightInfoAssistant 
+        isOpen={isAssistantOpen}
+        onToggle={() => setIsAssistantOpen(!isAssistantOpen)}
+        flightStrips={strips}
+        columns={columns}
+        onMoveStrip={handleDragEnd}
+        onUpdateStripNotes={handleUpdateStripNotes}
+        onUpdateStripSquawk={handleUpdateStripSquawk}
+      />
 
       {/* Footer Stats */}
       <div className="bg-gray-900 border-t border-gray-700 p-4">
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span className="text-gray-400">En Route: {flightStrips.filter(s => s.status === 'enroute').length}</span>
+            {columns.map(column => (
+              <div key={column.id} className="flex items-center space-x-2">
+                <div className="w-3 h-3 rounded bg-gray-500"></div>
+                <span className="text-gray-400">
+                  {column.name}: {getStripsForColumn(column.id).length}
+                </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-              <span className="text-gray-400">Descending: {flightStrips.filter(s => s.status === 'descending').length}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded"></div>
-              <span className="text-gray-400">Final: {flightStrips.filter(s => s.status === 'final').length}</span>
-            </div>
+            ))}
           </div>
           <div className="text-gray-400">
-            Total Strips: {flightStrips.length} • Active Sector: {selectedSector}
+            Total Strips: {strips.length}
           </div>
         </div>
       </div>

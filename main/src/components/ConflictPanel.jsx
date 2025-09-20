@@ -18,7 +18,7 @@ const ConflictPanel = ({ conflicts, onResolutionRequest }) => {
     
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5005/api/atc/resolutions', {
+      const response = await fetch('http://localhost:5001/api/atc/resolutions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

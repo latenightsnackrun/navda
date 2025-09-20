@@ -6,7 +6,6 @@ import BasicAircraftView from '../components/BasicAircraftView';
 import Sidebar from '../components/Sidebar';
 import ParametersBar from '../components/ParametersBar';
 import TopNavigation from '../components/TopNavigation';
-import SchedulingView from '../components/SchedulingView';
 import FlightStripsView from '../components/FlightStripsView';
 
 const Home = () => {
@@ -30,7 +29,7 @@ const Home = () => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`http://localhost:5005/api/atc/aircraft/airport/${airportCode}?radius=${radiusValue}`);
+      const response = await fetch(`http://localhost:5001/api/atc/aircraft/airport/${airportCode}?radius=${radiusValue}`);
       const data = await response.json();
       
       if (data.success) {
@@ -115,8 +114,6 @@ const Home = () => {
   // Render content based on active tab
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'scheduling':
-        return <SchedulingView />;
       case 'tickets':
         return <FlightStripsView />;
       case 'control':

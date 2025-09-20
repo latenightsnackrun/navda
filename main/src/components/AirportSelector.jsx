@@ -12,7 +12,7 @@ const AirportSelector = ({ onAirportChange, selectedAirport }) => {
   const fetchAirports = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:5005/api/atc/airports/list');
+      const response = await fetch('http://localhost:5001/api/atc/airports/list');
       const data = await response.json();
       
       if (data.success) {

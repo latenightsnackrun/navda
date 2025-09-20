@@ -10,7 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@cerebras/cerebras_cloud_sdk": "^1.50.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "axios": "^1.11.0",
+    "framer-motion": "^12.23.16",
     "globe.gl": "^2.44.0",
     "leaflet": "^1.9.4",
     "react": "^19.1.1",

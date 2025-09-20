@@ -10,11 +10,6 @@ const TopNavigation = ({ activeTab, onTabChange }) => {
       description: 'Real-time aircraft tracking and control'
     },
     { 
-      id: 'scheduling', 
-      name: 'Scheduling', 
-      description: 'Flight scheduling and resource management'
-    },
-    { 
       id: 'tickets', 
       name: 'Flight Strips', 
       description: 'Digital flight progress strips'
