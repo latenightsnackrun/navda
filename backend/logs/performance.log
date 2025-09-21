@@ -935,3 +935,7 @@
 2025-09-21 04:40:16,323 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 223LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
 2025-09-21 04:40:16,323 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '223LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
 2025-09-21 04:40:34,432 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analysis' for query: 'tell me about flight 448AN' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:42:01,302 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:42:01,304 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:42:01,308 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:42:01,308 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}

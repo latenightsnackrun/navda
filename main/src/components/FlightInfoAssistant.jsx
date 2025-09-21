@@ -102,13 +102,13 @@ const FlightInfoAssistant = ({ isOpen, onToggle, flightStrips = [], columns = []
       // Execute any commands the AI suggested
       const actions = executeAICommands(response);
       
-      // Combine AI response with executed actions
-      let finalResponse = response;
+      // If actions were taken, only show the actions list
       if (actions.length > 0) {
-        finalResponse += '\n\nActions taken:\n' + actions.join('\n');
+        setResponse('Actions taken:\n' + actions.join('\n'));
+      } else {
+        // If no actions were taken, show the full AI response
+        setResponse(response);
       }
-      
-      setResponse(finalResponse);
     } catch (error) {
       console.error('Cerebras API Error:', error);
       throw error;
