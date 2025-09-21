@@ -58,9 +58,6 @@ const AirportSelector = ({ onAirportChange, selectedAirport }) => {
 
   return (
     <div className="w-full max-w-md">
-      <label htmlFor="airport-select" className="block text-sm font-medium text-gray-300 mb-2">
-        Select Airport
-      </label>
       <select
         id="airport-select"
         value={selectedAirport || ''}

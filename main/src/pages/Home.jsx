@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Globe3D from '../components/Globe3D';
 import Cesium3D from '../components/Cesium3D';
 import InteractiveMap from '../components/InteractiveMap';
@@ -15,9 +15,10 @@ const Home = () => {
   const [aircraftData, setAircraftData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('3d'); // '3d', 'cesium', 'map', 'list'
+  const [viewMode, setViewMode] = useState('cesium'); // '3d', 'cesium', 'map', 'list'
   const [radius, setRadius] = useState(200); // Default 200nm
   const [liveUpdate, setLiveUpdate] = useState(true);
+  const [refreshRate, setRefreshRate] = useState(1000); // Default 1 second
   const [lastUpdate, setLastUpdate] = useState(null);
   const [activeTab, setActiveTab] = useState('control');
   const [showLandingPage, setShowLandingPage] = useState(true);
@@ -72,16 +73,20 @@ const Home = () => {
     }
   };
 
+  const handleRefreshRateChange = (newRate) => {
+    setRefreshRate(newRate);
+  };
+
   // Live updates effect
   useEffect(() => {
     if (!liveUpdate || !selectedAirport) return;
 
     const interval = setInterval(() => {
       fetchAircraftData(selectedAirport, radius);
-    }, 30000); // Update every 30 seconds
+    }, refreshRate); // Use configurable refresh rate
 
     return () => clearInterval(interval);
-  }, [liveUpdate, selectedAirport, radius]);
+  }, [liveUpdate, selectedAirport, radius, refreshRate]);
 
   // Render main viewer based on viewMode
   const renderViewer = () => {
@@ -113,10 +118,9 @@ const Home = () => {
             radius={radius}
           />
         );
-      case '3d':
       default:
         return (
-          <Globe3D 
+          <Cesium3D 
             selectedAirport={selectedAirport}
             aircraftData={aircraftData}
             radius={radius}
@@ -129,14 +133,24 @@ const Home = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'tickets':
-        return <FlightStripsView />;
+        return (
+          <div className="flex-1 flex overflow-hidden">
+            {/* Flight Strips Content */}
+            <div className="flex-1">
+              <FlightStripsView />
+            </div>
+          </div>
+        );
       case 'watchlist':
         return (
-          <div className="flex-1">
-            <WatchlistTab 
-              aircraftData={aircraftData}
-              selectedAirport={selectedAirport}
-            />
+          <div className="flex-1 flex overflow-hidden">
+            {/* Watchlist Content */}
+            <div className="flex-1">
+              <WatchlistTab 
+                aircraftData={aircraftData}
+                selectedAirport={selectedAirport}
+              />
+            </div>
           </div>
         );
       case 'control':
@@ -160,11 +174,17 @@ const Home = () => {
 
             {/* Main Viewer */}
             <div className="flex-1 flex flex-col">
-              <div className="flex-1 p-4">
-                <div className="h-full bg-gray-800 rounded-lg overflow-hidden">
+              {viewMode === 'cesium' ? (
+                <div className="flex-1">
                   {renderViewer()}
                 </div>
-              </div>
+              ) : (
+                <div className="flex-1 p-4">
+                  <div className="h-full bg-gray-800 rounded-lg overflow-hidden">
+                    {renderViewer()}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -190,7 +210,7 @@ const Home = () => {
         {renderTabContent()}
       </div>
 
-      {/* Bottom Parameters Bar - Only show for control tab */}
+      {/* Bottom Parameters Bar - Always show for control tab as footer */}
       {activeTab === 'control' && (
         <ParametersBar 
           radius={radius}
@@ -202,6 +222,8 @@ const Home = () => {
           viewMode={viewMode}
           liveUpdate={liveUpdate}
           onToggleLiveUpdate={() => setLiveUpdate(!liveUpdate)}
+          refreshRate={refreshRate}
+          onRefreshRateChange={handleRefreshRateChange}
         />
       )}
     </div>

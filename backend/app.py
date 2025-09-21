@@ -148,7 +148,7 @@ def get_aircraft_in_sector():
             min_lat, max_lat, min_lon, max_lon
         )
         
-        # Convert to JSON-serializable format
+        # Convert to JSON-serializable format with enhanced data
         aircraft_data = []
         for aircraft in aircraft_states:
             aircraft_data.append({
@@ -164,7 +164,15 @@ def get_aircraft_in_sector():
                 "origin_country": aircraft.origin_country,
                 "on_ground": aircraft.on_ground,
                 "squawk": aircraft.squawk,
-                "spi": aircraft.spi
+                "spi": aircraft.spi,
+                "position_source": aircraft.position_source,
+                # Additional computed fields
+                "altitude_ft": aircraft.altitude,
+                "speed_kts": aircraft.velocity,
+                "vs_fpm": aircraft.vertical_rate,
+                "track_deg": aircraft.heading,
+                "last_seen": aircraft.timestamp.isoformat(),
+                "data_age_sec": (datetime.now() - aircraft.timestamp).total_seconds()
             })
         
         return jsonify({
@@ -392,9 +400,12 @@ def get_airports_list():
 def get_aircraft_by_airport(airport_code):
     """Get aircraft near a specific airport"""
     try:
-        aircraft_data = aircraft_tracker.get_aircraft_by_airport(airport_code)
+        # Get radius parameter from query string, default to 200nm
+        radius = float(request.args.get('radius', 200))
         
-        # Convert to JSON-serializable format
+        aircraft_data = aircraft_tracker.get_aircraft_by_airport(airport_code, radius)
+        
+        # Convert to JSON-serializable format with enhanced data
         aircraft_list = []
         for aircraft in aircraft_data:
             aircraft_list.append({
@@ -410,14 +421,23 @@ def get_aircraft_by_airport(airport_code):
                 "origin_country": aircraft.origin_country,
                 "on_ground": aircraft.on_ground,
                 "squawk": aircraft.squawk,
-                "spi": aircraft.spi
+                "spi": aircraft.spi,
+                "position_source": aircraft.position_source,
+                # Additional computed fields
+                "altitude_ft": aircraft.altitude,
+                "speed_kts": aircraft.velocity,
+                "vs_fpm": aircraft.vertical_rate,
+                "track_deg": aircraft.heading,
+                "last_seen": aircraft.timestamp.isoformat(),
+                "data_age_sec": (datetime.now() - aircraft.timestamp).total_seconds()
             })
         
         return jsonify({
             "success": True,
             "data": aircraft_list,
             "count": len(aircraft_list),
-            "airport_code": airport_code
+            "airport_code": airport_code,
+            "radius": radius
         })
         
     except Exception as e:
@@ -807,8 +827,15 @@ def process_natural_language_query():
             
             return jsonify({
                 "success": True,
-                "data": result_dict
+                "result": result_dict
             })
+            
+        except Exception as e:
+            logging_service.log(LogLevel.ERROR, "ai_query", f"Query processing error: {str(e)}")
+            return jsonify({
+                "success": False,
+                "error": f"Query processing failed: {str(e)}"
+            }), 500
             
         finally:
             loop.close()

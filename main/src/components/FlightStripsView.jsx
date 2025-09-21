@@ -144,12 +144,21 @@ const FlightStrip = ({ strip, onEdit, isDragging = false }) => {
 
 // TRACON Dot Component
 const TraconDot = ({ strip, onRemove }) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onRemove(strip.id);
-    }, 10000); // 10 seconds
+  const [countdown, setCountdown] = useState(10);
 
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval);
+          onRemove(strip.id); // Remove dot when countdown hits 0
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownInterval);
   }, [strip.id, onRemove]);
 
   return (
@@ -159,8 +168,17 @@ const TraconDot = ({ strip, onRemove }) => {
       exit={{ scale: 0, opacity: 0 }}
       className="flex items-center justify-center h-8 w-8 mx-auto"
     >
-      <div className="w-4 h-4 bg-red-500 rounded-full border-2 border-red-300 shadow-lg">
-        <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+      <div className="relative">
+        {/* Glowing outer ring */}
+        <div className="absolute inset-0 w-6 h-6 bg-red-500 rounded-full animate-ping opacity-75"></div>
+        <div className="absolute inset-0 w-6 h-6 bg-red-400 rounded-full animate-pulse"></div>
+        
+        {/* Main dot with countdown */}
+        <div className="relative w-6 h-6 bg-red-500 rounded-full border-2 border-red-300 shadow-lg flex items-center justify-center">
+          <span className="text-white text-xs font-bold">
+            {countdown}
+          </span>
+        </div>
       </div>
       <div className="ml-2 text-xs text-gray-400 font-mono">
         {strip.callsign}

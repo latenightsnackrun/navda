@@ -29,7 +29,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
   useEffect(() => {
     const checkAIService = async () => {
       try {
-        const response = await fetch('http://localhost:5002/health');
+        const response = await fetch('http://localhost:5001/api/health');
         if (response.ok) {
           setAiServiceAvailable(true);
           setMessages(prev => [...prev, {
@@ -69,7 +69,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         case 'altitude':
           return (b.altitude || 0) - (a.altitude || 0);
         case 'speed':
-          return (b.speed || 0) - (a.speed || 0);
+          return (b.velocity || 0) - (a.velocity || 0);
         case 'icao24':
           return (a.icao24 || '').localeCompare(b.icao24 || '');
         default:
@@ -191,7 +191,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
     try {
       if (aiServiceAvailable) {
         // Use AI service for intelligent responses
-        const response = await fetch('http://localhost:5002/api/ai/process-query', {
+        const response = await fetch('http://localhost:5001/api/ai/process-query', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -215,9 +215,9 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
           if (result.filtered_aircraft && result.filtered_aircraft.length > 0) {
             responseText += `\n\n📊 Found ${result.total_matches} matching aircraft:\n`;
             result.filtered_aircraft.slice(0, 5).forEach(aircraft => {
-              const callsign = aircraft.callsign || aircraft.icao24;
+              const callsign = aircraft.callsign ? aircraft.callsign.trim() : aircraft.icao24;
               const altitude = aircraft.altitude ? `${Math.round(aircraft.altitude)}ft` : 'N/A';
-              const speed = aircraft.speed ? `${Math.round(aircraft.speed)}kts` : 'N/A';
+              const speed = aircraft.velocity ? `${Math.round(aircraft.velocity)}kts` : 'N/A';
               responseText += `• ${callsign} - ${altitude}, ${speed}\n`;
             });
           }
@@ -275,8 +275,8 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
 
   const formatAircraftInfo = (aircraft) => {
     const altitude = aircraft.altitude ? `${Math.round(aircraft.altitude)}ft` : 'N/A';
-    const speed = aircraft.speed ? `${Math.round(aircraft.speed)}kts` : 'N/A';
-    const callsign = aircraft.callsign || 'Unknown';
+    const speed = aircraft.velocity ? `${Math.round(aircraft.velocity)}kts` : 'N/A';
+    const callsign = aircraft.callsign ? aircraft.callsign.trim() : 'Unknown';
     
     return `${callsign} • ${altitude} • ${speed}`;
   };
@@ -592,25 +592,25 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-            {messages.map((message) => (
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
               <div
-                key={message.id}
-                className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`max-w-[80%] p-3 rounded-lg text-sm ${
+                  message.type === 'user'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-800 text-gray-100 border border-gray-700'
+                }`}
               >
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg text-sm ${
-                    message.type === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-100 border border-gray-700'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                  <div className="text-xs mt-2 opacity-60">
-                    {message.timestamp.toLocaleTimeString()}
-                  </div>
+                <div className="whitespace-pre-wrap">{message.content}</div>
+                <div className="text-xs mt-2 opacity-60">
+                  {message.timestamp.toLocaleTimeString()}
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
             
             {/* Loading indicator for AI analysis */}
             {isAnalyzing && (

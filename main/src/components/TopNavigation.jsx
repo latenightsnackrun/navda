@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 const TopNavigation = ({ activeTab, onTabChange, onBackToLanding }) => {
@@ -9,52 +9,55 @@ const TopNavigation = ({ activeTab, onTabChange, onBackToLanding }) => {
     { 
       id: 'control', 
       name: 'Control Tower', 
-      description: 'Real-time aircraft tracking and control'
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      )
     },
     { 
       id: 'tickets', 
       name: 'Flight Strips', 
-      description: 'Digital flight progress strips'
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      )
     },
     { 
       id: 'watchlist', 
       name: 'Watchlist', 
-      description: 'Aircraft behavior monitoring'
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+      )
     }
   ];
 
   return (
-    <nav className="bg-black/95 backdrop-blur-sm border-b border-gray-800/50">
-      <div className="max-w-none px-6 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo Section */}
-          <div className="flex items-center space-x-8">
-            {onBackToLanding && (
-              <button
-                onClick={onBackToLanding}
-                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors"
-                title="Back to Global View"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span className="text-sm">Global View</span>
-              </button>
-            )}
-            <div className="flex items-center space-x-3">
-              {/* Avivato Logo */}
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-white rounded-sm flex items-center justify-center">
-                  <svg className="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-                  </svg>
-                </div>
-                <div className="text-xl font-semibold text-white tracking-tight">NAVDA</div>
-              </div>
-            </div>
+    <nav className="bg-gray-900 border-b border-gray-700">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-16">
+          {/* Left Section - Logo (all the way left) */}
+          <div className="flex items-center">
+            <h1 
+              className="text-2xl font-bold text-white"
+              style={{ 
+                fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                fontWeight: '800',
+                letterSpacing: '-0.02em'
+              }}
+            >
+              <span className="text-blue-400">NAV</span>
+              <span className="text-white">DA</span>
+            </h1>
+          </div>
 
-            {/* Navigation Tabs - Desktop */}
-            <div className="hidden md:flex items-center space-x-1">
+          {/* Navigation Tabs */}
+          <div className="hidden md:flex items-center space-x-1 ml-8">
+            <div className="flex space-x-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -71,19 +74,37 @@ const TopNavigation = ({ activeTab, onTabChange, onBackToLanding }) => {
             </div>
           </div>
 
+          {/* Spacer to push right section to the right */}
+          <div className="flex-1"></div>
+
           {/* Right Section */}
           <div className="flex items-center space-x-6">
+            {/* Controller Section */}
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-sm text-gray-400 font-mono">CONTROLLER</span>
+            </div>
+
             {/* System Status */}
             <div className="hidden lg:flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-sm text-gray-400 font-mono">OPERATIONAL</span>
-              </div>
               <div className="text-gray-600">•</div>
               <div className="text-sm text-gray-400 font-mono">
                 {new Date().toLocaleTimeString('en-US', { hour12: false })}
               </div>
             </div>
+
+            {/* Logout/Back Button - Far Right */}
+            {onBackToLanding && (
+              <button
+                onClick={onBackToLanding}
+                className="p-2 text-gray-400 hover:text-white transition-colors"
+                title="Exit to Landing Page"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 21l4-7 4 7M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                </svg>
+              </button>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -91,50 +112,16 @@ const TopNavigation = ({ activeTab, onTabChange, onBackToLanding }) => {
               className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-
-            {/* User Profile */}
-            {isAuthenticated && user && (
-              <div className="hidden sm:flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
-                  {user.picture ? (
-                    <img 
-                      src={user.picture} 
-                      alt={user.name || user.email} 
-                      className="w-8 h-8 rounded-full"
-                    />
-                  ) : (
-                    <svg className="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                  )}
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-white">
-                    {user.name || user.email || 'User'}
-                  </div>
-                  <div className="text-xs text-gray-400 font-mono">Controller</div>
-                </div>
-                <button
-                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                  className="ml-2 p-1.5 text-gray-400 hover:text-white transition-colors"
-                  title="Logout"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden mt-6 pt-6 border-t border-gray-800">
-            <div className="space-y-1">
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-800 rounded-lg mt-2">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -142,65 +129,16 @@ const TopNavigation = ({ activeTab, onTabChange, onBackToLanding }) => {
                     onTabChange(tab.id);
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-3 rounded-sm transition-all duration-200 ${
+                  className={`w-full flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors ${
                     activeTab === tab.id
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-900'
+                      ? 'text-white bg-gray-700'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
                 >
-                  <div className="font-medium">{tab.name}</div>
-                  <div className="text-xs text-gray-500 mt-1">{tab.description}</div>
+                  <span className="mr-2">{tab.icon}</span>
+                  {tab.name}
                 </button>
               ))}
-            </div>
-
-            {/* Mobile User Profile */}
-            {isAuthenticated && user && (
-              <div className="mt-6 pt-6 border-t border-gray-800">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center border border-gray-700">
-                    {user.picture ? (
-                      <img 
-                        src={user.picture} 
-                        alt={user.name || user.email} 
-                        className="w-10 h-10 rounded-full"
-                      />
-                    ) : (
-                      <svg className="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                      </svg>
-                    )}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-white">
-                      {user.name || user.email || 'User'}
-                    </div>
-                    <div className="text-xs text-gray-400 font-mono">Controller</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                  className="w-full flex items-center space-x-2 px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-900 rounded-sm transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span>Logout</span>
-                </button>
-              </div>
-            )}
-
-            {/* Mobile System Status */}
-            <div className="mt-6 pt-6 border-t border-gray-800">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-sm text-gray-400 font-mono">OPERATIONAL</span>
-                </div>
-                <div className="text-sm text-gray-400 font-mono">
-                  {new Date().toLocaleTimeString('en-US', { hour12: false })}
-                </div>
-              </div>
             </div>
           </div>
         )}

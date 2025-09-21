@@ -261,7 +261,7 @@ class SimpleAIService:
             
             # Statistical analysis
             altitudes = [a.get('altitude', 0) for a in filtered_aircraft if a.get('altitude')]
-            speeds = [a.get('speed', 0) for a in filtered_aircraft if a.get('speed')]
+            speeds = [a.get('velocity', 0) for a in filtered_aircraft if a.get('velocity')]
             
             if altitudes:
                 avg_alt = sum(altitudes) / len(altitudes)
@@ -275,6 +275,16 @@ class SimpleAIService:
                 insights.append(f"Average speed: {avg_speed:.0f}kts")
             
             # Intent-specific analysis
+            if 'height' in query.lower() or 'altitude' in query.lower():
+                # Show individual aircraft heights
+                response_parts.append("\nAircraft Heights:")
+                for i, aircraft in enumerate(filtered_aircraft[:5]):  # Show first 5
+                    callsign = aircraft.get('callsign', aircraft.get('icao24', 'Unknown'))
+                    altitude = aircraft.get('altitude', 0)
+                    response_parts.append(f"• {callsign}: {altitude:.0f}ft")
+                if len(filtered_aircraft) > 5:
+                    response_parts.append(f"... and {len(filtered_aircraft) - 5} more aircraft")
+            
             if 'descending' in query.lower():
                 rapid_descent = [a for a in filtered_aircraft if (a.get('vertical_rate', 0) or 0) < -1500]
                 if rapid_descent:
@@ -321,7 +331,7 @@ class SimpleAIService:
         
         for aircraft in aircraft_data:
             altitude = aircraft.get('altitude', 0) or 0
-            speed = aircraft.get('speed', 0) or 0
+            speed = aircraft.get('velocity', 0) or 0  # Use 'velocity' instead of 'speed'
             vertical_rate = aircraft.get('vertical_rate', 0) or 0
             
             # Altitude filters
@@ -357,6 +367,12 @@ class SimpleAIService:
                     filtered.append(aircraft)
                 continue
             
+            # Height/altitude queries
+            if 'height' in query_lower or 'altitude' in query_lower:
+                # For height queries, include all aircraft with their altitudes
+                filtered.append(aircraft)
+                continue
+            
             # Emergency or concerning
             if 'emergency' in query_lower or 'critical' in query_lower or 'concerning' in query_lower:
                 risk_score = self._calculate_risk_score(aircraft)
@@ -365,7 +381,7 @@ class SimpleAIService:
                 continue
             
             # Default - if no specific filters, include all
-            if not any(term in query_lower for term in ['high', 'low', 'fast', 'slow', 'descending', 'climbing', 'emergency', 'critical']):
+            if not any(term in query_lower for term in ['high', 'low', 'fast', 'slow', 'descending', 'climbing', 'emergency', 'critical', 'height', 'altitude']):
                 filtered.append(aircraft)
         
         return filtered

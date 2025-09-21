@@ -281,6 +281,86 @@ def health_check():
         "timestamp": datetime.now().isoformat()
     })
 
+@app.route('/api/ai/process-query', methods=['POST'])
+def process_ai_query():
+    """Process AI queries for aircraft analysis"""
+    try:
+        from flask import request
+        data = request.get_json()
+        query = data.get('query', '').lower()
+        aircraft_data = data.get('aircraft_data', [])
+        context = data.get('context', {})
+        
+        # Simple AI responses based on query keywords
+        if 'summary' in query:
+            total_aircraft = len(aircraft_data)
+            on_ground = len([a for a in aircraft_data if a.get('on_ground', False)])
+            in_air = total_aircraft - on_ground
+            high_altitude = len([a for a in aircraft_data if a.get('altitude', 0) > 30000])
+            
+            response_text = f"📊 **Aircraft Summary**\n\n"
+            response_text += f"• Total aircraft: {total_aircraft}\n"
+            response_text += f"• On ground: {on_ground}\n"
+            response_text += f"• In air: {in_air}\n"
+            response_text += f"• High altitude (>30,000ft): {high_altitude}\n\n"
+            
+            if context.get('watchlist'):
+                response_text += f"• Watchlist aircraft: {len(context['watchlist'])}\n"
+            
+            response_text += f"• Last updated: {datetime.now().strftime('%H:%M:%S')}"
+            
+        elif 'low altitude' in query:
+            low_alt = [a for a in aircraft_data if a.get('altitude', 0) < 5000 and not a.get('on_ground', False)]
+            response_text = f"🔍 **Low Altitude Aircraft** ({len(low_alt)} found)\n\n"
+            for aircraft in low_alt[:10]:  # Show first 10
+                callsign = aircraft.get('callsign', aircraft.get('icao24', 'Unknown'))
+                alt = aircraft.get('altitude', 0)
+                response_text += f"• {callsign} - {alt:.0f}ft\n"
+                
+        elif 'high speed' in query:
+            high_speed = [a for a in aircraft_data if a.get('velocity', 0) > 400]
+            response_text = f"🚀 **High Speed Aircraft** ({len(high_speed)} found)\n\n"
+            for aircraft in high_speed[:10]:  # Show first 10
+                callsign = aircraft.get('callsign', aircraft.get('icao24', 'Unknown'))
+                speed = aircraft.get('velocity', 0)
+                response_text += f"• {callsign} - {speed:.0f}kts\n"
+                
+        elif 'watchlist' in query or 'analyze' in query:
+            watchlist = context.get('watchlist', [])
+            if watchlist:
+                response_text = f"👀 **Watchlist Analysis** ({len(watchlist)} aircraft)\n\n"
+                for aircraft in watchlist:
+                    callsign = aircraft.get('callsign', aircraft.get('icao24', 'Unknown'))
+                    alt = aircraft.get('altitude', 0)
+                    speed = aircraft.get('velocity', 0)
+                    response_text += f"• {callsign} - {alt:.0f}ft, {speed:.0f}kts\n"
+            else:
+                response_text = "📝 No aircraft in watchlist. Add aircraft to monitor their behavior."
+                
+        else:
+            response_text = f"🤖 **AI Analysis**\n\nI received your query: '{query}'\n\n"
+            response_text += f"Currently tracking {len(aircraft_data)} aircraft in the area.\n"
+            response_text += "Try asking for:\n• 'summary' - Get aircraft overview\n"
+            response_text += "• 'low altitude' - Find low flying aircraft\n"
+            response_text += "• 'high speed' - Find fast aircraft\n"
+            response_text += "• 'analyze watchlist' - Review monitored aircraft"
+        
+        return jsonify({
+            "success": True,
+            "result": {
+                "response": response_text,
+                "filtered_aircraft": [],
+                "total_matches": 0,
+                "insights": []
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
 if __name__ == '__main__':
     print("Starting Simple ATC Backend on port 5005...")
     app.run(host='0.0.0.0', port=5005, debug=True)

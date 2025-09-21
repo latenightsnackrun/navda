@@ -253,40 +253,7 @@ const MapControlBar = ({
               </button>
             )}
 
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-sm">Radius:</span>
-              <div className="flex space-x-1">
-                {radiusOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => onRadiusChange(option.value)}
-                    className={`px-3 py-1 text-sm rounded transition-colors ${
-                      radius === option.value
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {/* Aircraft Stats */}
-            {stats.total > 0 && (
-              <div className="flex items-center space-x-3 text-sm">
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span className="text-gray-400">Air:</span>
-                  <span className="text-green-400 font-medium">{stats.airborne}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                  <span className="text-gray-400">Ground:</span>
-                  <span className="text-red-400 font-medium">{stats.ground}</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Right Section - Controls */}

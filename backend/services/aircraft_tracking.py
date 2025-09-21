@@ -36,7 +36,7 @@ class AircraftTrackingService:
         
         # Cache for API responses
         self.cache = {}
-        self.cache_duration = 60  # seconds - increased to reduce API calls
+        self.cache_duration = 5  # seconds - reduced for more frequent updates
         
         # Major airports data for dropdown
         self.airports = {
@@ -79,16 +79,18 @@ class AircraftTrackingService:
             print(f"Error getting aircraft data: {e}")
             return []
     
-    def get_aircraft_by_airport(self, airport_code: str) -> List[AircraftState]:
-        """Get aircraft near a specific airport"""
+    def get_aircraft_by_airport(self, airport_code: str, radius_nm: float = 200) -> List[AircraftState]:
+        """Get aircraft near a specific airport within specified radius"""
         try:
             if airport_code not in self.airports:
                 return []
             
             airport = self.airports[airport_code]
-            # Define a sector around the airport (approximately 50nm radius)
-            lat_range = 0.5  # degrees
-            lon_range = 0.5  # degrees
+            # Convert nautical miles to degrees (approximate)
+            # 1 degree latitude ≈ 60 nautical miles
+            # 1 degree longitude ≈ 60 * cos(latitude) nautical miles
+            lat_range = radius_nm / 60.0
+            lon_range = radius_nm / (60.0 * abs(airport["lat"]))
             
             min_lat = airport["lat"] - lat_range
             max_lat = airport["lat"] + lat_range
@@ -175,19 +177,143 @@ class AircraftTrackingService:
                                 return value.lower() in ['true', '1', 'yes', 'on']
                             return default
                         
+                        # Determine if aircraft is on ground
+                        alt_baro = flight.get('alt_baro', 0)
+                        is_on_ground = (alt_baro == 'ground' or 
+                                      (isinstance(alt_baro, (int, float)) and alt_baro < 100))
+                        
+                        # Get callsign with better fallback logic
+                        callsign = flight.get('flight', flight.get('callsign', ''))
+                        if not callsign or callsign.strip() == '':
+                            # Try to construct callsign from other fields
+                            if flight.get('hex'):
+                                callsign = f"AC{flight.get('hex', '')[-4:]}"
+                            else:
+                                callsign = 'N/A'
+                        
+                        # Clean up callsign
+                        if callsign and callsign != 'N/A':
+                            callsign = callsign.strip().upper()
+                            # Remove common prefixes/suffixes that might be noise
+                            if callsign.startswith('N'):
+                                callsign = callsign[1:]
+                            if len(callsign) > 8:  # Limit length
+                                callsign = callsign[:8]
+                        
+                        # Get squawk code with better handling
+                        squawk = flight.get('squawk', '')
+                        if not squawk or squawk == '' or squawk == '0':
+                            squawk = 'N/A'
+                        
+                        # Get origin country from icao24 if available
+                        icao24 = flight.get('hex', flight.get('icao', ''))
+                        origin_country = 'N/A'
+                        if icao24 and len(icao24) >= 6:
+                            # Basic country detection from ICAO24
+                            if icao24.startswith(('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('4')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('3')):
+                                origin_country = 'CA'
+                            elif icao24.startswith(('4')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('5')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('6')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('7')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('8')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('9')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('c')):
+                                origin_country = 'CA'
+                            elif icao24.startswith(('e')):
+                                origin_country = 'EU'
+                            elif icao24.startswith(('f')):
+                                origin_country = 'FR'
+                            elif icao24.startswith(('g')):
+                                origin_country = 'UK'
+                            elif icao24.startswith(('h')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('i')):
+                                origin_country = 'IT'
+                            elif icao24.startswith(('j')):
+                                origin_country = 'JP'
+                            elif icao24.startswith(('k')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('l')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('m')):
+                                origin_country = 'MX'
+                            elif icao24.startswith(('n')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('o')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('p')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('q')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('r')):
+                                origin_country = 'RU'
+                            elif icao24.startswith(('s')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('t')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('u')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('v')):
+                                origin_country = 'CA'
+                            elif icao24.startswith(('w')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('x')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('y')):
+                                origin_country = 'US'
+                            elif icao24.startswith(('z')):
+                                origin_country = 'US'
+
+                        # Enhanced data extraction
+                        aircraft_type = flight.get('t', 'N/A')
+                        if aircraft_type == 'N/A' or aircraft_type == '':
+                            # Try to determine aircraft type from callsign patterns
+                            if callsign and callsign != 'N/A':
+                                callsign_upper = callsign.upper()
+                                if any(airline in callsign_upper for airline in ['AAL', 'UAL', 'DAL', 'SWA', 'JBU', 'BAW', 'AFR', 'DLH', 'KLM']):
+                                    aircraft_type = 'Commercial'
+                                elif any(military in callsign_upper for military in ['RCH', 'CNV', 'EVAC', 'REACH', 'AIR FORCE', 'ARMY', 'NAVY']):
+                                    aircraft_type = 'Military'
+                                elif callsign_upper.startswith('N') and len(callsign_upper) <= 6:
+                                    aircraft_type = 'Private'
+                                else:
+                                    aircraft_type = 'Unknown'
+
+                        # Get additional useful fields
+                        nav_modes = flight.get('nav_modes', [])
+                        category = flight.get('category', 'N/A')
+                        
+                        # Enhanced altitude calculation
+                        altitude_ft = safe_float(alt_baro) if alt_baro != 'ground' else 0
+                        if altitude_ft > 0 and altitude_ft < 1000:
+                            altitude_ft = round(altitude_ft, 0)
+                        elif altitude_ft >= 1000:
+                            altitude_ft = round(altitude_ft, -1)  # Round to nearest 10 feet
+
                         aircraft = AircraftState(
-                            icao24=flight.get('hex', flight.get('icao', 'UNKNOWN')),
-                            callsign=flight.get('flight', flight.get('callsign', 'UNKNOWN')),
-                            latitude=safe_float(lat),
-                            longitude=safe_float(lon),
-                            altitude=safe_float(flight.get('alt_baro', flight.get('alt', 0))) * 3.28084,  # Convert m to ft
-                            velocity=safe_float(flight.get('gs', flight.get('speed', 0))) * 0.514444,  # Convert knots to m/s
-                            heading=safe_float(flight.get('track', flight.get('heading', 0))),
-                            vertical_rate=safe_float(flight.get('baro_rate', flight.get('vrate', 0))) * 0.00508,  # Convert ft/min to m/s
+                            icao24=icao24 if icao24 else 'N/A',
+                            callsign=callsign.strip(),
+                            latitude=round(safe_float(lat), 6),  # Round to 6 decimal places
+                            longitude=round(safe_float(lon), 6),  # Round to 6 decimal places
+                            altitude=altitude_ft,
+                            velocity=round(safe_float(flight.get('gs', flight.get('speed', 0))), 1),  # Round to 1 decimal
+                            heading=round(safe_float(flight.get('track', flight.get('heading', 0))), 1),  # Round to 1 decimal
+                            vertical_rate=round(safe_float(flight.get('baro_rate', flight.get('vrate', 0))), 0),  # Round to whole number
                             timestamp=datetime.now(),
-                            origin_country=flight.get('country', 'UNKNOWN'),
-                            on_ground=safe_bool(flight.get('ground', False)),
-                            squawk=flight.get('squawk', 'UNKNOWN'),
+                            origin_country=origin_country,
+                            on_ground=is_on_ground,
+                            squawk=squawk,
                             spi=safe_bool(flight.get('spi', False)),
                             position_source=1  # ADSB source
                         )

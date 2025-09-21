@@ -148,9 +148,9 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
         // Allow panning (drag camera without orbiting)
         controller.enableTranslate = true;
         
-        // Set pitch (tilt up/down) limits for ATC view
-        controller.minimumPitch = window.Cesium.Math.toRadians(-89.0); // look almost straight up
-        controller.maximumPitch = window.Cesium.Math.toRadians(0.0);   // horizon (no looking down from below)
+        // Set pitch (tilt up/down) limits for globe view
+        controller.minimumPitch = window.Cesium.Math.toRadians(-90.0); // look straight down
+        controller.maximumPitch = window.Cesium.Math.toRadians(0.0);   // horizon
         
         console.log('Camera controls configured:', {
           enableTilt: controller.enableTilt,
@@ -159,17 +159,17 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
           maxPitch: controller.maximumPitch
         });
         
-        // Set initial camera to side view after a short delay
+        // Set initial camera to show the whole globe
         setTimeout(() => {
           viewer.camera.setView({
-            destination: window.Cesium.Cartesian3.fromDegrees(-75.59777, 40.03883, 20000.0), // lon, lat, height (higher for 3D buildings)
+            destination: window.Cesium.Cartesian3.fromDegrees(0, 0, 20000000), // Center of globe, high altitude
             orientation: {
               heading: window.Cesium.Math.toRadians(0.0),   // face north
-              pitch: window.Cesium.Math.toRadians(-60.0),   // tilt 60° down from horizon (more vertical ATC view)
+              pitch: window.Cesium.Math.toRadians(-90.0),   // look straight down at globe
               roll: 0.0
             }
           });
-          console.log('Initial ATC camera view set with 60° tilt and 3D buildings');
+          console.log('Initial camera view set to show whole globe');
         }, 100);
 
         viewerRef.current = viewer;
@@ -429,9 +429,7 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
         className="w-full h-full"
         style={{ 
           width: '100%', 
-          height: '80vh',
-          maxHeight: '600px',
-          minHeight: '400px',
+          height: '100%',
           backgroundColor: '#1a1a1a'
         }}
       />

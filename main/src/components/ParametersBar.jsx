@@ -9,7 +9,9 @@ const ParametersBar = ({
   loading,
   viewMode,
   liveUpdate,
-  onToggleLiveUpdate
+  onToggleLiveUpdate,
+  refreshRate,
+  onRefreshRateChange
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -58,7 +60,7 @@ const ParametersBar = ({
                 className={`w-12 h-6 rounded-full transition-colors duration-200 ${
                   liveUpdate ? 'bg-green-600' : 'bg-gray-600'
                 }`}
-                title="Toggle live data updates every 30 seconds"
+                title="Toggle live data updates"
               >
                 <div className={`w-5 h-5 bg-white rounded-full transition-transform duration-200 ${
                   liveUpdate ? 'translate-x-6' : 'translate-x-0'
@@ -66,10 +68,46 @@ const ParametersBar = ({
               </button>
             </div>
 
-            {/* Radius Display */}
+            {/* Refresh Rate Slider - Only show when live updates are active */}
+            {liveUpdate && (
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-400 text-sm">Refresh Rate:</span>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="range"
+                    min="250"
+                    max="2000"
+                    step="250"
+                    value={refreshRate}
+                    onChange={(e) => onRefreshRateChange(parseInt(e.target.value))}
+                    className="w-20 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                    title={`${refreshRate}ms refresh rate`}
+                  />
+                  <span className="text-white text-sm font-mono min-w-[3rem]">
+                    {refreshRate < 1000 ? `${refreshRate}ms` : `${refreshRate / 1000}s`}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Radius Slider */}
             <div className="flex items-center space-x-2">
               <span className="text-gray-400 text-sm">Search Radius:</span>
-              <span className="text-white font-medium">{radius}nm</span>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="range"
+                  min="50"
+                  max="500"
+                  step="50"
+                  value={radius}
+                  onChange={(e) => onRadiusChange(parseInt(e.target.value))}
+                  className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  title={`${radius}nm search radius`}
+                />
+                <span className="text-white text-sm font-mono min-w-[3rem]">
+                  {radius}nm
+                </span>
+              </div>
             </div>
           </div>
 
@@ -98,13 +136,6 @@ const ParametersBar = ({
               </div>
             )}
 
-            {/* Loading Indicator */}
-            {loading && (
-              <div className="flex items-center space-x-2 text-sm text-yellow-400">
-                <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                <span>Loading...</span>
-              </div>
-            )}
 
             {/* Expand Button */}
             <button
@@ -166,7 +197,12 @@ const ParametersBar = ({
                 </div>
                 <div className="bg-gray-800 p-3 rounded">
                   <div className="text-gray-400 text-sm mb-1">Update Frequency</div>
-                  <div className="text-white text-sm">Every 30 seconds</div>
+                  <div className="text-white text-sm">
+                    {liveUpdate 
+                      ? `Every ${refreshRate < 1000 ? `${refreshRate}ms` : `${refreshRate / 1000}s`}`
+                      : 'Manual updates only'
+                    }
+                  </div>
                 </div>
                 <div className="bg-gray-800 p-3 rounded">
                   <div className="text-gray-400 text-sm mb-1">View Mode</div>

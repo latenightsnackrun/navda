@@ -16,34 +16,24 @@ const Sidebar = ({
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   
-  // Prevent collapse when using 3D view that needs more space
-  const isGlobeView = viewMode === 'cesium';
-  const shouldPreventCollapse = isGlobeView;
+  // Define missing variables to ensure sidebar can collapse on all tabs
+  const shouldPreventCollapse = false; // Allow collapsing on all tabs
+  const isActuallyCollapsed = isCollapsed;
   
-  // Force expand and prevent collapse for 3D views
-  const isActuallyCollapsed = shouldPreventCollapse ? false : isCollapsed;
-
   const viewModes = [
     { id: 'cesium', name: '3D View', description: 'Realistic 3D aircraft models and terrain' },
     { id: 'map', name: '2D Map', description: 'Zoomable map with aircraft markers' },
     { id: 'list', name: 'List View', description: 'Detailed aircraft information table' }
   ];
 
-  // Auto-expand when switching to globe view
-  useEffect(() => {
-    if (shouldPreventCollapse && isCollapsed) {
-      setIsCollapsed(false);
-    }
-  }, [shouldPreventCollapse, isCollapsed]);
-
   // Calculate sidebar width - consistent across all tabs
-  const sidebarWidth = isActuallyCollapsed ? 'w-16' : 'w-80';
+  const sidebarWidth = isCollapsed ? 'w-16' : 'w-80';
 
   return (
     <div className={`bg-gray-900/50 border-r border-gray-800 transition-all duration-300 ${sidebarWidth} flex flex-col h-full`}>
       {/* Sidebar Header */}
       <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
-        {!isActuallyCollapsed && (
+        {!isCollapsed && (
           <div>
             <h2 className="text-white text-lg font-semibold">ATC Control</h2>
             <p className="text-gray-400 text-sm">Aircraft Tracking System</p>
@@ -74,11 +64,10 @@ const Sidebar = ({
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        {!isActuallyCollapsed && (
+        {!isCollapsed && (
           <>
             {/* Airport Selection */}
           <div className="p-4 border-b border-gray-700">
-            <h3 className="text-white text-sm font-medium mb-3">Select Airport</h3>
             <AirportSelector 
               onAirportChange={onAirportChange}
               selectedAirport={selectedAirport}
@@ -135,11 +124,9 @@ const Sidebar = ({
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300 text-sm">✈️ Aircraft Tracked</span>
                     <div className="flex items-center space-x-2">
-                      <div className={`w-3 h-3 rounded-full ${
-                        loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400 animate-pulse'
-                      }`}></div>
+                      <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
                       <span className="text-white font-bold text-lg">
-                        {loading ? '...' : aircraftData.length}
+                        {aircraftData.length}
                       </span>
                     </div>
                   </div>
@@ -279,11 +266,9 @@ const Sidebar = ({
               <div className="pt-2 border-t border-gray-700 space-y-2">
                 {/* Aircraft Count */}
                 <div className="text-center">
-                  <div className={`w-2 h-2 rounded-full mx-auto mb-1 ${
-                    loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'
-                  }`}></div>
+                  <div className="w-2 h-2 rounded-full mx-auto mb-1 bg-green-400"></div>
                   <div className="text-white text-xs font-medium">
-                    {loading ? '...' : aircraftData.length}
+                    {aircraftData.length}
                   </div>
                   <div className="text-gray-500 text-xs">Aircraft</div>
                 </div>
