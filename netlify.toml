@@ -3,7 +3,7 @@
   command = "npm run build"
   
   # Directory to publish (Vite builds to 'dist' by default)
-  publish = "dist"
+  publish = "main/dist"
 
 [build.environment]
   # Node.js version
