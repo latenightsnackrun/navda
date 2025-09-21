@@ -340,14 +340,12 @@ const AircraftInfoWindow = ({ aircraftData, isOpen, onClose, selectedAircraft })
                       <span className="text-gray-400">Heading:</span>
                       <span className="text-white font-bold">{Math.round(selectedAircraft.heading)}°</span>
                     </div>
-                    {selectedAircraft.vertical_rate && Math.abs(selectedAircraft.vertical_rate) > 64 && (
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Vertical Rate:</span>
-                        <span className={`font-bold ${selectedAircraft.vertical_rate > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {selectedAircraft.vertical_rate > 0 ? '↗' : '↘'} {Math.abs(Math.round(selectedAircraft.vertical_rate))} ft/min
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Vertical Rate:</span>
+                      <span className={`font-bold ${selectedAircraft.vertical_rate > 0 ? 'text-green-400' : selectedAircraft.vertical_rate < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                        {selectedAircraft.vertical_rate > 0 ? '↗' : selectedAircraft.vertical_rate < 0 ? '↘' : '↔'} {Math.abs(Math.round(selectedAircraft.vertical_rate || 0))} ft/min
+                      </span>
+                    </div>
                   </div>
                 </div>
 

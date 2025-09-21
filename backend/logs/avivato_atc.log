@@ -570,3 +570,23 @@
 2025-09-21 01:04:52,506 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
 2025-09-21 01:04:52,508 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
 2025-09-21 01:04:52,509 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 02:40:06,996 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:40:06,997 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 137WS - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:41:41,265 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 327ME - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:49:24,410 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 340MJ - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:49:45,734 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 714RM - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:49:47,687 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 8156R - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:52:53,012 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 340MJ - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 02:52:54,236 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 714RM - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:00:20,910 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 448AN - AircraftStatusEnum.NORMAL | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:00:26,142 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 8156R - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:00:35,831 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 959LA - AircraftStatusEnum.NORMAL | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:00:48,955 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 8156R - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:07:23,061 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: JBU515 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:07:24,634 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: VOI7841 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:07:25,681 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: KS1596 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:10:52,452 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: VOS4309 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:10:56,274 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: CLX43X - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:22:10,328 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 520PD - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:22:52,879 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: UAL1075 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:22:54,566 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: KAL214 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}

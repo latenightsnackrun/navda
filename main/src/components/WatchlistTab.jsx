@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import AltitudeHistoryChart from './AltitudeHistoryChart';
+import MiniAltitudeChart from './MiniAltitudeChart';
 
-const WatchlistTab = ({ aircraftData, selectedAirport }) => {
-  const [watchlist, setWatchlist] = useState([]);
+const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, onAddToWatchlist }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [selectedAircraft, setSelectedAircraft] = useState(null);
@@ -124,7 +124,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
     setFilteredAircraft(filtered);
   }, [aircraftData, searchTerm, sortBy]);
 
-  const addToWatchlist = async (aircraft) => {
+  const addToWatchlistLocal = async (aircraft) => {
     if (!watchlist.find(item => item.icao24 === aircraft.icao24)) {
       const watchItem = {
         ...aircraft,
@@ -450,11 +450,27 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
   };
 
   const formatAircraftInfo = (aircraft) => {
-    const altitude = aircraft.altitude ? `${Math.round(aircraft.altitude)}ft` : 'N/A';
-    const speed = aircraft.velocity ? `${Math.round(aircraft.velocity)}kts` : 'N/A';
     const callsign = aircraft.callsign ? aircraft.callsign.trim() : 'Unknown';
-    
-    return `${callsign} • ${altitude} • ${speed}`;
+    return callsign;
+  };
+
+  // Get current aircraft data for watchlist entries
+  const getCurrentAircraftData = (watchlistItem) => {
+    const currentAircraft = aircraftData.find(ac => ac.icao24 === watchlistItem.icao24);
+    if (currentAircraft) {
+      return {
+        ...watchlistItem,
+        altitude: currentAircraft.altitude,
+        velocity: currentAircraft.velocity,
+        heading: currentAircraft.heading,
+        vertical_rate: currentAircraft.vertical_rate,
+        on_ground: currentAircraft.on_ground,
+        callsign: currentAircraft.callsign || watchlistItem.callsign,
+        latitude: currentAircraft.latitude,
+        longitude: currentAircraft.longitude
+      };
+    }
+    return watchlistItem;
   };
 
   // Show globe view when no airport is selected
@@ -504,7 +520,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         <div className="flex-1 flex flex-col">
           <div className="p-4 border-b border-gray-700 bg-gray-800">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-100">Available Aircraft</h3>
+              <h3 className="font-semibold text-gray-100">Airborne Aircraft</h3>
               <div className="text-xs text-gray-400">
                 {filteredAircraft.length} of {aircraftData.length}
               </div>
@@ -526,20 +542,19 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                 >
                   Clear
                 </button>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-400">Sort by:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
-                >
-                  <option value="callsign">Callsign</option>
-                  <option value="altitude">Altitude</option>
-                  <option value="speed">Speed</option>
-                  <option value="icao24">ICAO24</option>
-                </select>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-400">Sort by:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-2 py-1 text-xs bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="callsign">Callsign</option>
+                    <option value="altitude">Altitude</option>
+                    <option value="speed">Speed</option>
+                    <option value="icao24">ICAO24</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -582,16 +597,14 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                           </div>
                         )}
                       </div>
-                      {aircraft.vertical_rate && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          Vertical: {aircraft.vertical_rate > 0 ? '+' : ''}{Math.round(aircraft.vertical_rate)} ft/min
-                        </div>
-                      )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        Vertical: {aircraft.vertical_rate > 0 ? '+' : aircraft.vertical_rate < 0 ? '' : '+'}{Math.round(aircraft.vertical_rate || 0)} ft/min
+                      </div>
                     </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        addToWatchlist(aircraft);
+                        addToWatchlistLocal(aircraft);
                       }}
                       disabled={watchlist.find(item => item.icao24 === aircraft.icao24)}
                       className="ml-3 px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -609,11 +622,23 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         <div className="h-1/2 border-t border-gray-700 flex flex-col">
           <div className="p-4 border-b border-gray-700 bg-gray-800">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-semibold text-gray-100">Watchlist</h3>
               <div className="flex items-center space-x-2">
-                <div className="text-xs text-gray-400">
-                  {watchlist.length} aircraft
-                </div>
+                <h3 className="font-semibold text-gray-100">Watchlist</h3>
+                {watchlist.length > 0 && (
+                  <div className="flex space-x-2 text-xs">
+                    {['critical', 'concerning', 'monitoring', 'normal'].map(status => {
+                      const count = watchlist.filter(item => item.status === status).length;
+                      if (count === 0) return null;
+                      return (
+                        <span key={status} className={`px-2 py-1 rounded ${getStatusColor(status)}`}>
+                          {count} {status}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
                 {watchlist.length > 0 && (
                   <button
                     onClick={() => {
@@ -632,24 +657,9 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                 )}
               </div>
             </div>
-            
-            {/* Status Summary */}
-            {watchlist.length > 0 && (
-              <div className="flex space-x-2 text-xs">
-                {['critical', 'concerning', 'monitoring', 'normal'].map(status => {
-                  const count = watchlist.filter(item => item.status === status).length;
-                  if (count === 0) return null;
-                  return (
-                    <span key={status} className={`px-2 py-1 rounded ${getStatusColor(status)}`}>
-                      {count} {status}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-2" style={{ maxHeight: 'calc(50vh - 120px)' }}>
+          <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" style={{ maxHeight: 'calc(50vh - 120px)' }}>
             {watchlist.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 <svg className="w-8 h-8 mx-auto mb-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -660,50 +670,62 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                 <p className="text-xs text-gray-600 mt-1">Add aircraft to monitor behavior</p>
               </div>
             ) : (
-              watchlist.map((aircraft) => (
+              watchlist.map((watchlistItem) => {
+                const aircraft = getCurrentAircraftData(watchlistItem);
+                return (
                 <div
                   key={aircraft.icao24}
-                  className={`p-3 rounded border cursor-pointer transition-all ${
+                  className={`p-2 rounded border cursor-pointer transition-all ${
                     selectedAircraft && selectedAircraft.icao24 === aircraft.icao24
                       ? 'bg-blue-900/30 border-blue-700'
                       : 'bg-gray-800/50 border-gray-700 hover:border-gray-600'
                   }`}
                   onClick={() => setSelectedAircraft(aircraft)}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="font-mono text-sm text-gray-100">
+                  {/* Single Horizontal Row */}
+                  <div className="flex items-center">
+                    {/* Left: Aircraft Info */}
+                    <div className="flex-1 min-w-0 flex items-center space-x-4">
+                      <div className="text-white font-bold text-sm flex-shrink-0">
                         {formatAircraftInfo(aircraft)}
                       </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(aircraft.status || 'monitoring')}`}>
-                            {aircraft.status || 'monitoring'}
-                          </span>
-                          {aircraft.lastAnalysis && (
-                            <span className="text-xs text-gray-500">
-                              {Math.round((aircraft.lastAnalysis.confidence || 0.5) * 100)}% confidence
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs text-gray-500">
-                          {aircraft.addedAt.toLocaleTimeString()}
-                        </span>
+                      
+                      {/* Current Values */}
+                      <div className="flex items-center space-x-3 text-xs">
+                        <span className="text-gray-400">Alt:</span>
+                        <span className="text-white">{aircraft.altitude ? aircraft.altitude.toLocaleString() : 'N/A'}ft</span>
+                        <span className="text-gray-400">GS:</span>
+                        <span className="text-white">{aircraft.velocity ? aircraft.velocity : 'N/A'}kt</span>
+                        <span className="text-gray-400">Hdg:</span>
+                        <span className="text-white">{aircraft.heading ? aircraft.heading : 'N/A'}°</span>
                       </div>
-                      {aircraft.lastAnalysis && aircraft.lastAnalysis.concerns && aircraft.lastAnalysis.concerns.length > 0 && (
-                        <div className="mt-2 text-xs text-yellow-400">
-                          ⚠️ {aircraft.lastAnalysis.concerns.join(', ')}
-                        </div>
-                      )}
                     </div>
-                    <div className="flex items-center space-x-1 ml-3">
+                    
+                    {/* Center: Time */}
+                    <div className="flex-shrink-0 mx-4 text-center">
+                      <div className="text-xs text-gray-500">
+                        {aircraft.addedAt ? aircraft.addedAt.toLocaleTimeString() : 'Unknown'}
+                      </div>
+                    </div>
+                    
+                    {/* Mini Chart - Fixed Position */}
+                    <div className="flex-shrink-0 mx-4">
+                      <MiniAltitudeChart 
+                        data={altitudeHistory[aircraft.icao24] || []} 
+                        aircraft={aircraft}
+                        className=""
+                      />
+                    </div>
+                    
+                    {/* Right: Action Buttons */}
+                    <div className="flex items-center space-x-1 flex-shrink-0">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowGraph(showGraph === aircraft.icao24 ? null : aircraft.icao24);
                         }}
-                        className="p-1 text-gray-400 hover:text-green-400 transition-colors"
-                        title="Show altitude history graph"
+                        className="p-1.5 text-gray-400 hover:text-green-400 transition-colors rounded"
+                        title="Toggle altitude history graph"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -714,7 +736,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                           e.stopPropagation();
                           analyzeAircraft(aircraft);
                         }}
-                        className="p-1 text-gray-400 hover:text-blue-400 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-blue-400 transition-colors rounded"
                         title="Re-analyze aircraft"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -726,7 +748,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                           e.stopPropagation();
                           removeFromWatchlist(aircraft.icao24);
                         }}
-                        className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-red-400 transition-colors rounded"
                         title="Remove from watchlist"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -735,6 +757,13 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                       </button>
                     </div>
                   </div>
+
+                  {/* Concerns */}
+                  {aircraft.lastAnalysis && aircraft.lastAnalysis.concerns && aircraft.lastAnalysis.concerns.length > 0 && (
+                    <div className="mt-3 p-2 bg-yellow-900/20 border border-yellow-800/50 rounded text-xs text-yellow-400">
+                      ⚠️ {aircraft.lastAnalysis.concerns.join(', ')}
+                    </div>
+                  )}
                   
                   {/* Altitude History Graph */}
                   {showGraph === aircraft.icao24 && altitudeHistory[aircraft.icao24] && (
@@ -762,7 +791,8 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                     </div>
                   )}
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -805,7 +835,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" style={{ maxHeight: 'calc(100vh - 300px)' }}>
           {messages.map((message) => (
             <div
               key={message.id}
@@ -896,19 +926,19 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
             <div className="flex justify-between">
               <span className="text-gray-400">Speed:</span>
               <span className="text-gray-100 font-mono">
-                {selectedAircraft.speed ? `${Math.round(selectedAircraft.speed)}kts` : 'N/A'}
+                {selectedAircraft.velocity ? `${Math.round(selectedAircraft.velocity)}kts` : 'N/A'}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Status:</span>
-              <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(selectedAircraft.status)}`}>
-                {selectedAircraft.status}
+              <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(selectedAircraft.status || 'monitoring')}`}>
+                {selectedAircraft.status || 'monitoring'}
               </span>
             </div>
             <div className="pt-2 border-t border-gray-700">
               <div className="text-gray-400 text-xs mb-1">Added to watchlist:</div>
               <div className="text-gray-100 text-xs font-mono">
-                {selectedAircraft.addedAt.toLocaleString()}
+                {selectedAircraft.addedAt ? selectedAircraft.addedAt.toLocaleString() : 'Unknown'}
               </div>
             </div>
           </div>

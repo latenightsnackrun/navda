@@ -22,6 +22,20 @@ const Home = () => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [activeTab, setActiveTab] = useState('control');
   const [showLandingPage, setShowLandingPage] = useState(true);
+  const [watchlist, setWatchlist] = useState([]);
+
+  const addToWatchlist = (aircraft) => {
+    if (!watchlist.find(item => item.icao24 === aircraft.icao24)) {
+      const watchItem = {
+        ...aircraft,
+        addedAt: new Date(),
+        status: 'monitoring',
+        reason: 'Manual addition',
+        lastAnalysis: null
+      };
+      setWatchlist([...watchlist, watchItem]);
+    }
+  };
 
   const fetchAircraftData = async (airportCode, radiusValue = radius) => {
     if (!airportCode) {
@@ -116,6 +130,7 @@ const Home = () => {
             selectedAirport={selectedAirport}
             aircraftData={aircraftData}
             radius={radius}
+            onAddToWatchlist={addToWatchlist}
           />
         );
       default:
@@ -149,6 +164,9 @@ const Home = () => {
               <WatchlistTab 
                 aircraftData={aircraftData}
                 selectedAirport={selectedAirport}
+                watchlist={watchlist}
+                setWatchlist={setWatchlist}
+                onAddToWatchlist={addToWatchlist}
               />
             </div>
           </div>
