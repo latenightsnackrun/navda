@@ -58,11 +58,14 @@ const AirportSelector = ({ onAirportChange, selectedAirport }) => {
 
   return (
     <div className="w-full max-w-md">
+      <label htmlFor="airport-select" className="block text-sm font-medium text-gray-300 mb-2">
+        Select Airport
+      </label>
       <select
         id="airport-select"
         value={selectedAirport || ''}
         onChange={handleAirportChange}
-        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-aviation-500 focus:border-transparent backdrop-blur-sm"
+        className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-aviation-500 focus:border-transparent backdrop-blur-sm"
       >
         <option value="">Select an airport...</option>
         {airports.map((airport) => (

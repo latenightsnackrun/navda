@@ -16,7 +16,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('cesium'); // '3d', 'cesium', 'map', 'list'
-  const [radius, setRadius] = useState(200); // Default 200nm
+  const [radius, setRadius] = useState(300); // Default 300nm for more aircraft
   const [liveUpdate, setLiveUpdate] = useState(true);
   const [refreshRate, setRefreshRate] = useState(1000); // Default 1 second
   const [lastUpdate, setLastUpdate] = useState(null);

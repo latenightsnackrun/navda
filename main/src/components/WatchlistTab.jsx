@@ -368,7 +368,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
             </div>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-2" style={{ maxHeight: 'calc(50vh - 120px)' }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" style={{ maxHeight: 'calc(50vh - 120px)' }}>
             {aircraftData.length === 0 ? (
               <div className="text-center text-gray-500 py-8">
                 <svg className="w-12 h-12 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

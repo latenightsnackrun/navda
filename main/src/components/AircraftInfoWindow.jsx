@@ -402,7 +402,7 @@ const AircraftInfoWindow = ({ aircraftData, isOpen, onClose, selectedAircraft })
           {activeTab === 'list' && (
             <div className="p-4">
               <h3 className="text-lg font-semibold text-white mb-4">All Aircraft ({aircraftData?.length || 0})</h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500">
                 {aircraftData?.map((aircraft, index) => (
                   <div
                     key={`${aircraft.icao24}-${index}`}

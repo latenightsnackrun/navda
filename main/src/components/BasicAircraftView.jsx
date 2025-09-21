@@ -11,7 +11,7 @@ const BasicAircraftView = ({ selectedAirport, aircraftData = [], radius = 200 })
         typeof aircraft.latitude === 'number' && 
         typeof aircraft.longitude === 'number'
       )
-      .slice(0, 20) // Limit to first 20 for performance
+      // Remove artificial limit to show all aircraft
       .map((aircraft, index) => ({
         id: index,
         callsign: aircraft.callsign || 'Unknown',
@@ -41,7 +41,7 @@ const BasicAircraftView = ({ selectedAirport, aircraftData = [], radius = 200 })
             Aircraft near {selectedAirport || 'Selected Airport'} ({radius}nm)
           </h3>
           <p className="text-gray-400 text-sm">
-            {aircraftData.length} total aircraft • Showing first {Math.min(displayData.length, 20)}
+            {aircraftData.length} total aircraft • Showing {displayData.length}
           </p>
           <p className="text-gray-500 text-xs mt-1">
             Updated: {new Date().toLocaleTimeString()}
@@ -49,7 +49,7 @@ const BasicAircraftView = ({ selectedAirport, aircraftData = [], radius = 200 })
         </div>
 
         {/* Aircraft List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500">
           {displayData.length === 0 ? (
             <div className="flex items-center justify-center h-full text-gray-400">
               <div className="text-center">
@@ -59,11 +59,11 @@ const BasicAircraftView = ({ selectedAirport, aircraftData = [], radius = 200 })
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {displayData.map((aircraft) => (
                 <div
                   key={aircraft.id}
-                  className={`p-3 rounded-lg border relative ${
+                  className={`px-3 py-1.5 rounded border relative ${
                     aircraft.emergency 
                       ? 'bg-red-900/40 border-red-500 shadow-red-500/20 shadow-lg' 
                       : aircraft.onGround 
@@ -73,67 +73,57 @@ const BasicAircraftView = ({ selectedAirport, aircraftData = [], radius = 200 })
                 >
                   {/* Emergency indicators */}
                   {aircraft.emergency && (
-                    <div className="absolute top-1 right-1 bg-red-600 text-white px-1 py-0.5 rounded text-xs font-bold animate-pulse">
+                    <div className="absolute top-0.5 right-1 bg-red-600 text-white px-1 py-0.5 rounded text-xs font-bold animate-pulse">
                       🚨
                     </div>
                   )}
 
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
+                  {/* First line: Callsign, Registration, Coordinates */}
+                  <div className="flex justify-between items-center text-xs">
+                    <div className="flex items-center space-x-3">
                       <div className="text-white font-bold text-sm">
                         {aircraft.callsign}
                       </div>
-                      <div className="text-blue-300 font-mono text-xs">
+                      <div className="text-blue-300 font-mono">
                         {aircraft.registration}
                       </div>
-                      <div className="text-gray-400 text-xs">
+                      <div className="text-gray-400">
                         {aircraft.latitude}, {aircraft.longitude}
                       </div>
-                      <div className="text-gray-500 text-xs">
-                        {aircraft.country}
-                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`text-xs px-2 py-1 rounded ${
-                        aircraft.onGround 
-                          ? 'bg-red-600 text-white' 
-                          : 'bg-green-600 text-white'
-                      }`}>
-                        {aircraft.onGround ? '🛬 GROUND' : '✈️ AIR'}
-                      </div>
+                    <div className="text-gray-500 text-xs">
+                      {aircraft.country}
                     </div>
                   </div>
-                  <div className="mt-2 grid grid-cols-4 gap-2 text-xs">
-                    <div>
+
+                  {/* Second line: Flight data */}
+                  <div className="flex justify-between items-center text-xs mt-0.5">
+                    <div className="flex items-center space-x-4">
                       <span className="text-gray-400">Alt:</span>
-                      <span className="text-white ml-1">{aircraft.altitude.toLocaleString()}ft</span>
-                    </div>
-                    <div>
+                      <span className="text-white">{aircraft.altitude.toLocaleString()}ft</span>
                       <span className="text-gray-400">GS:</span>
-                      <span className="text-white ml-1">{aircraft.velocity}kt</span>
-                    </div>
-                    <div>
+                      <span className="text-white">{aircraft.velocity}kt</span>
                       <span className="text-gray-400">Hdg:</span>
-                      <span className="text-white ml-1">{aircraft.heading}°</span>
-                    </div>
-                    <div>
+                      <span className="text-white">{aircraft.heading}°</span>
                       <span className="text-gray-400">Sqk:</span>
-                      <span className="text-cyan-300 ml-1 font-mono">{aircraft.squawk}</span>
+                      <span className="text-cyan-300 font-mono">{aircraft.squawk}</span>
                     </div>
-                    {aircraft.trueAirspeed && aircraft.trueAirspeed !== aircraft.velocity && (
-                      <div>
-                        <span className="text-gray-400">TAS:</span>
-                        <span className="text-white ml-1">{aircraft.trueAirspeed}kt</span>
-                      </div>
-                    )}
-                    {Math.abs(aircraft.verticalRate) > 64 && (
-                      <div>
-                        <span className="text-gray-400">V/S:</span>
-                        <span className={`ml-1 ${aircraft.verticalRate > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {aircraft.verticalRate > 0 ? '↗' : '↘'}{Math.abs(aircraft.verticalRate)}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      {aircraft.trueAirspeed && aircraft.trueAirspeed !== aircraft.velocity && (
+                        <div className="flex items-center">
+                          <span className="text-gray-400">TAS:</span>
+                          <span className="text-white ml-1">{aircraft.trueAirspeed}kt</span>
+                        </div>
+                      )}
+                      {Math.abs(aircraft.verticalRate) > 64 && (
+                        <div className="flex items-center">
+                          <span className="text-gray-400">V/S:</span>
+                          <span className={`ml-1 ${aircraft.verticalRate > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {aircraft.verticalRate > 0 ? '↗' : '↘'}{Math.abs(aircraft.verticalRate)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

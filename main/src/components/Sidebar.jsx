@@ -113,16 +113,16 @@ const Sidebar = ({
             </div>
           </div>
 
-          {/* Status Information */}
+          {/* Status & Aircraft Stats */}
           <div className="p-4 border-b border-gray-700">
-            <h3 className="text-white text-sm font-medium mb-3">Status</h3>
+            <h3 className="text-white text-sm font-medium mb-3">Status & Aircraft Stats</h3>
             
             {selectedAirport && (
               <div className="space-y-3">
                 {/* Aircraft Count */}
-                <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-3 rounded-lg border border-gray-600">
+                <div className="bg-gray-800 p-3 rounded-lg border border-gray-600">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300 text-sm">✈️ Aircraft Tracked</span>
+                    <span className="text-gray-300 text-sm">Aircraft Tracked</span>
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
                       <span className="text-white font-bold text-lg">
@@ -132,33 +132,8 @@ const Sidebar = ({
                   </div>
                 </div>
 
-                {/* Last Update */}
-                {lastUpdate && (
-                  <div className="bg-gray-800 p-3 rounded-lg">
-                    <div className="text-gray-400 text-sm mb-1">Last Update</div>
-                    <div className="text-white text-sm">{lastUpdate.toLocaleTimeString()}</div>
-                  </div>
-                )}
-
-                {/* Live Updates Control */}
-                <div className="bg-gray-800 p-3 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-gray-400 text-sm">Live Updates</div>
-                      <div className="text-xs text-gray-500">Auto-refresh every 0.25s</div>
-                    </div>
-                    <button
-                      onClick={onToggleLiveUpdate}
-                      className={`w-12 h-6 rounded-full transition-colors duration-200 ${
-                        liveUpdate ? 'bg-green-600' : 'bg-gray-600'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 bg-white rounded-full transition-transform duration-200 ${
-                        liveUpdate ? 'translate-x-6' : 'translate-x-0'
-                      }`} />
-                    </button>
-                  </div>
-                </div>
+                {/* Spacing */}
+                <div className="h-2"></div>
 
               </div>
             )}
@@ -169,60 +144,60 @@ const Sidebar = ({
                 <div className="text-red-300 text-sm">{error}</div>
               </div>
             )}
+
+            {/* Aircraft Stats - Only show if we have aircraft data */}
+            {aircraftData.length > 0 && (
+              <>
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                  <div className="bg-gray-800 p-2 rounded border border-gray-600">
+                    <div className="text-green-300">Airborne</div>
+                    <div className="text-green-400 font-bold text-lg">
+                      {aircraftData.filter(a => !a.on_ground).length}
+                    </div>
+                  </div>
+                  <div className="bg-gray-800 p-2 rounded border border-gray-600">
+                    <div className="text-red-300">On Ground</div>
+                    <div className="text-red-400 font-bold text-lg">
+                      {aircraftData.filter(a => a.on_ground).length}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Aircraft Type Breakdown */}
+                <div className="space-y-1">
+                  <div className="text-gray-400 text-xs mb-1">Aircraft Types:</div>
+                  {(() => {
+                    const getAircraftType = (callsign, altitude) => {
+                      if (!callsign) return 'unknown';
+                      const callsignUpper = callsign.toUpperCase();
+                      if (callsignUpper.includes('CARGO') || callsignUpper.includes('FDX') || callsignUpper.includes('UPS')) return 'cargo';
+                      if (altitude < 25000 && (callsignUpper.length <= 5 || callsignUpper.match(/^N\d/))) return 'private';
+                      if (callsignUpper.includes('AIR FORCE') || callsignUpper.includes('ARMY') || callsignUpper.includes('NAVY') || callsignUpper.match(/^(RCH|CNV|EVAC|REACH)/)) return 'military';
+                      if (callsignUpper.match(/^(AAL|UAL|DAL|BAW|AFR|DLH|KLM|SWA|JBU)/) && altitude > 30000) return 'heavy';
+                      if (altitude < 30000) return 'regional';
+                      return 'commercial';
+                    };
+                    
+                    const types = {};
+                    aircraftData.forEach(aircraft => {
+                      if (!aircraft.on_ground) {
+                        const type = getAircraftType(aircraft.callsign, aircraft.altitude);
+                        types[type] = (types[type] || 0) + 1;
+                      }
+                    });
+                    
+                    return Object.entries(types).map(([type, count]) => (
+                      <div key={type} className="flex justify-between text-xs">
+                        <span className="text-gray-400 capitalize">{type}:</span>
+                        <span className="text-white font-medium">{count}</span>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Quick Stats */}
-          {aircraftData.length > 0 && (
-            <div className="p-4 border-b border-gray-700">
-              <h3 className="text-white text-sm font-medium mb-3">Aircraft Stats</h3>
-              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                <div className="bg-gradient-to-br from-green-900/50 to-green-800/50 p-2 rounded border border-green-700/50">
-                  <div className="text-green-300">✈️ Airborne</div>
-                  <div className="text-green-400 font-bold text-lg">
-                    {aircraftData.filter(a => !a.on_ground).length}
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-red-900/50 to-red-800/50 p-2 rounded border border-red-700/50">
-                  <div className="text-red-300">🛬 On Ground</div>
-                  <div className="text-red-400 font-bold text-lg">
-                    {aircraftData.filter(a => a.on_ground).length}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Aircraft Type Breakdown */}
-              <div className="space-y-1">
-                <div className="text-gray-400 text-xs mb-1">Aircraft Types:</div>
-                {(() => {
-                  const getAircraftType = (callsign, altitude) => {
-                    if (!callsign) return 'unknown';
-                    const callsignUpper = callsign.toUpperCase();
-                    if (callsignUpper.includes('CARGO') || callsignUpper.includes('FDX') || callsignUpper.includes('UPS')) return 'cargo';
-                    if (altitude < 25000 && (callsignUpper.length <= 5 || callsignUpper.match(/^N\d/))) return 'private';
-                    if (callsignUpper.includes('AIR FORCE') || callsignUpper.includes('ARMY') || callsignUpper.includes('NAVY') || callsignUpper.match(/^(RCH|CNV|EVAC|REACH)/)) return 'military';
-                    if (callsignUpper.match(/^(AAL|UAL|DAL|BAW|AFR|DLH|KLM|SWA|JBU)/) && altitude > 30000) return 'heavy';
-                    if (altitude < 30000) return 'regional';
-                    return 'commercial';
-                  };
-                  
-                  const types = {};
-                  aircraftData.forEach(aircraft => {
-                    if (!aircraft.on_ground) {
-                      const type = getAircraftType(aircraft.callsign, aircraft.altitude);
-                      types[type] = (types[type] || 0) + 1;
-                    }
-                  });
-                  
-                  return Object.entries(types).map(([type, count]) => (
-                    <div key={type} className="flex justify-between text-xs">
-                      <span className="text-gray-400 capitalize">{type}:</span>
-                      <span className="text-white font-medium">{count}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            </div>
-          )}
         </>
         )}
         

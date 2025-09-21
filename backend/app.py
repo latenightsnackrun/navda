@@ -148,12 +148,14 @@ def get_aircraft_in_sector():
             min_lat, max_lat, min_lon, max_lon
         )
         
-        # Convert to JSON-serializable format with enhanced data
+        # Convert to JSON-serializable format with comprehensive data
         aircraft_data = []
         for aircraft in aircraft_states:
             aircraft_data.append({
+                # Basic identification
                 "icao24": aircraft.icao24,
                 "callsign": aircraft.callsign,
+                "registration": aircraft.registration,
                 "latitude": aircraft.latitude,
                 "longitude": aircraft.longitude,
                 "altitude": aircraft.altitude,
@@ -166,13 +168,79 @@ def get_aircraft_in_sector():
                 "squawk": aircraft.squawk,
                 "spi": aircraft.spi,
                 "position_source": aircraft.position_source,
-                # Additional computed fields
+                
+                # Speed data
+                "ias": aircraft.ias,
+                "tas": aircraft.tas,
+                "mach": aircraft.mach,
+                "gs": aircraft.gs,
+                
+                # Navigation data
+                "mag_heading": aircraft.mag_heading,
+                "true_heading": aircraft.true_heading,
+                "nav_heading": aircraft.nav_heading,
+                "nav_altitude_mcp": aircraft.nav_altitude_mcp,
+                "nav_altitude_fms": aircraft.nav_altitude_fms,
+                "nav_qnh": aircraft.nav_qnh,
+                "nav_modes": aircraft.nav_modes,
+                
+                # Environmental data
+                "wd": aircraft.wd,
+                "ws": aircraft.ws,
+                "oat": aircraft.oat,
+                "tat": aircraft.tat,
+                "roll": aircraft.roll,
+                "gps_altitude": aircraft.gps_altitude,
+                "baro_rate": aircraft.baro_rate,
+                "geom_rate": aircraft.geom_rate,
+                
+                # Aircraft information
+                "aircraft_type": aircraft.aircraft_type,
+                "category": aircraft.category,
+                "wake_turb": aircraft.wake_turb,
+                "manufacturer": aircraft.manufacturer,
+                "model": aircraft.model,
+                "typecode": aircraft.typecode,
+                "year": aircraft.year,
+                "engine_count": aircraft.engine_count,
+                "engine_type": aircraft.engine_type,
+                
+                # Operator information
+                "operator": aircraft.operator,
+                "operator_icao": aircraft.operator_icao,
+                "operator_iata": aircraft.operator_iata,
+                "operator_callsign": aircraft.operator_callsign,
+                "owner": aircraft.owner,
+                "owner_icao": aircraft.owner_icao,
+                "owner_iata": aircraft.owner_iata,
+                "owner_callsign": aircraft.owner_callsign,
+                
+                # Status flags
+                "test": aircraft.test,
+                "special": aircraft.special,
+                "military": aircraft.military,
+                "interesting": aircraft.interesting,
+                "alert": aircraft.alert,
+                "emergency": aircraft.emergency,
+                "silent": aircraft.silent,
+                
+                # Technical data
+                "rssi": aircraft.rssi,
+                "dbm": aircraft.dbm,
+                "seen": aircraft.seen,
+                "seen_pos": aircraft.seen_pos,
+                "seen_at": aircraft.seen_at,
+                "messages": aircraft.messages,
+                "mlat": aircraft.mlat,
+                "tisb": aircraft.tisb,
+                "data_age_sec": aircraft.data_age_sec,
+                
+                # Legacy fields for compatibility
                 "altitude_ft": aircraft.altitude,
                 "speed_kts": aircraft.velocity,
                 "vs_fpm": aircraft.vertical_rate,
                 "track_deg": aircraft.heading,
-                "last_seen": aircraft.timestamp.isoformat(),
-                "data_age_sec": (datetime.now() - aircraft.timestamp).total_seconds()
+                "last_seen": aircraft.timestamp.isoformat()
             })
         
         return jsonify({
@@ -405,12 +473,14 @@ def get_aircraft_by_airport(airport_code):
         
         aircraft_data = aircraft_tracker.get_aircraft_by_airport(airport_code, radius)
         
-        # Convert to JSON-serializable format with enhanced data
+        # Convert to JSON-serializable format with comprehensive data
         aircraft_list = []
         for aircraft in aircraft_data:
             aircraft_list.append({
+                # Basic identification
                 "icao24": aircraft.icao24,
                 "callsign": aircraft.callsign,
+                "registration": aircraft.registration,
                 "latitude": aircraft.latitude,
                 "longitude": aircraft.longitude,
                 "altitude": aircraft.altitude,
@@ -423,13 +493,79 @@ def get_aircraft_by_airport(airport_code):
                 "squawk": aircraft.squawk,
                 "spi": aircraft.spi,
                 "position_source": aircraft.position_source,
-                # Additional computed fields
+                
+                # Speed data
+                "ias": aircraft.ias,
+                "tas": aircraft.tas,
+                "mach": aircraft.mach,
+                "gs": aircraft.gs,
+                
+                # Navigation data
+                "mag_heading": aircraft.mag_heading,
+                "true_heading": aircraft.true_heading,
+                "nav_heading": aircraft.nav_heading,
+                "nav_altitude_mcp": aircraft.nav_altitude_mcp,
+                "nav_altitude_fms": aircraft.nav_altitude_fms,
+                "nav_qnh": aircraft.nav_qnh,
+                "nav_modes": aircraft.nav_modes,
+                
+                # Environmental data
+                "wd": aircraft.wd,
+                "ws": aircraft.ws,
+                "oat": aircraft.oat,
+                "tat": aircraft.tat,
+                "roll": aircraft.roll,
+                "gps_altitude": aircraft.gps_altitude,
+                "baro_rate": aircraft.baro_rate,
+                "geom_rate": aircraft.geom_rate,
+                
+                # Aircraft information
+                "aircraft_type": aircraft.aircraft_type,
+                "category": aircraft.category,
+                "wake_turb": aircraft.wake_turb,
+                "manufacturer": aircraft.manufacturer,
+                "model": aircraft.model,
+                "typecode": aircraft.typecode,
+                "year": aircraft.year,
+                "engine_count": aircraft.engine_count,
+                "engine_type": aircraft.engine_type,
+                
+                # Operator information
+                "operator": aircraft.operator,
+                "operator_icao": aircraft.operator_icao,
+                "operator_iata": aircraft.operator_iata,
+                "operator_callsign": aircraft.operator_callsign,
+                "owner": aircraft.owner,
+                "owner_icao": aircraft.owner_icao,
+                "owner_iata": aircraft.owner_iata,
+                "owner_callsign": aircraft.owner_callsign,
+                
+                # Status flags
+                "test": aircraft.test,
+                "special": aircraft.special,
+                "military": aircraft.military,
+                "interesting": aircraft.interesting,
+                "alert": aircraft.alert,
+                "emergency": aircraft.emergency,
+                "silent": aircraft.silent,
+                
+                # Technical data
+                "rssi": aircraft.rssi,
+                "dbm": aircraft.dbm,
+                "seen": aircraft.seen,
+                "seen_pos": aircraft.seen_pos,
+                "seen_at": aircraft.seen_at,
+                "messages": aircraft.messages,
+                "mlat": aircraft.mlat,
+                "tisb": aircraft.tisb,
+                "data_age_sec": aircraft.data_age_sec,
+                
+                # Legacy fields for compatibility
                 "altitude_ft": aircraft.altitude,
                 "speed_kts": aircraft.velocity,
                 "vs_fpm": aircraft.vertical_rate,
                 "track_deg": aircraft.heading,
-                "last_seen": aircraft.timestamp.isoformat(),
-                "data_age_sec": (datetime.now() - aircraft.timestamp).total_seconds()
+                "last_seen": aircraft.timestamp.isoformat()
             })
         
         return jsonify({

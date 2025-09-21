@@ -21,7 +21,7 @@ const FallbackATCDashboard = ({ aircraft, conflicts, onAircraftSelect, sector })
             <span className="w-3 h-3 bg-green-500 rounded-full mr-3"></span>
             Aircraft in Sector ({aircraft.length})
           </h3>
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 hover:scrollbar-thumb-gray-500">
             {aircraft.map((aircraftData, index) => (
               <div
                 key={aircraftData.icao24 || index}

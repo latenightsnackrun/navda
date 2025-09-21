@@ -1,5 +1,44 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+// Helper function to create aircraft icon with better visibility
+const createAircraftIcon = (color) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 24; // Smaller for better performance
+  canvas.height = 24;
+  const ctx = canvas.getContext('2d');
+  
+  // Draw aircraft shape with better contrast
+  ctx.fillStyle = color.toCssColorString();
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 2;
+  
+  // Aircraft body (main fuselage)
+  ctx.beginPath();
+  ctx.ellipse(12, 12, 8, 3, 0, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Aircraft wings (horizontal)
+  ctx.beginPath();
+  ctx.ellipse(12, 12, 6, 1.5, 0, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Aircraft tail (vertical)
+  ctx.beginPath();
+  ctx.ellipse(12, 9, 1.5, 4, 0, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+  
+  // Add a small dot in the center for better visibility
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.arc(12, 12, 1, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  return canvas;
+};
+
 const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -78,101 +117,208 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
           terrainShadows: window.Cesium.ShadowMode.ENABLED
         });
 
-        // Set terrain provider after viewer creation
+        // Set up proper terrain provider with water and normals
         try {
-          // Try to use world terrain if available
-          if (window.Cesium.CesiumTerrainProvider && window.Cesium.CesiumTerrainProvider.fromIonAssetId) {
-            window.Cesium.CesiumTerrainProvider.fromIonAssetId(1)
-              .then(terrainProvider => {
-                viewer.terrainProvider = terrainProvider;
-                console.log('World terrain loaded');
-              })
-              .catch(error => {
-                console.warn('Could not load world terrain, using default:', error);
-                viewer.terrainProvider = new window.Cesium.EllipsoidTerrainProvider();
-              });
+          // Use Cesium World Terrain with water mask and vertex normals
+          if (window.Cesium.createWorldTerrainAsync) {
+            viewer.terrainProvider = await window.Cesium.createWorldTerrainAsync({
+              requestWaterMask: true,   // for realistic water effects
+              requestVertexNormals: true // for better lighting/shading
+            });
+            console.log('Cesium World Terrain loaded with water mask and vertex normals');
           } else {
-            // Use default terrain provider
-            viewer.terrainProvider = new window.Cesium.EllipsoidTerrainProvider();
-            console.log('Using default terrain provider');
+            // Fallback to Ion terrain
+            if (window.Cesium.CesiumTerrainProvider && window.Cesium.CesiumTerrainProvider.fromIonAssetId) {
+              window.Cesium.CesiumTerrainProvider.fromIonAssetId(1)
+                .then(terrainProvider => {
+                  viewer.terrainProvider = terrainProvider;
+                  console.log('Ion terrain loaded');
+                })
+                .catch(error => {
+                  console.warn('Could not load Ion terrain, using default:', error);
+                  viewer.terrainProvider = new window.Cesium.EllipsoidTerrainProvider();
+                });
+            } else {
+              viewer.terrainProvider = new window.Cesium.EllipsoidTerrainProvider();
+              console.log('Using default terrain provider');
+            }
           }
         } catch (error) {
           console.warn('Terrain setup error, using default:', error);
           viewer.terrainProvider = new window.Cesium.EllipsoidTerrainProvider();
         }
 
-        // Enable 3D buildings
+        // 3D buildings disabled for better performance - terrain only
+        console.log('3D buildings disabled - using terrain only for optimal performance');
+
+        // Ensure proper imagery layer is loaded beneath terrain
         try {
-          if (window.Cesium.Cesium3DTileset && window.Cesium.Cesium3DTileset.fromIonAssetId) {
-            window.Cesium.Cesium3DTileset.fromIonAssetId(1, {
-              maximumScreenSpaceError: 0.8,
-              maximumMemoryUsage: 1024
-            }).then(tileset => {
-              viewer.scene.primitives.add(tileset);
-              console.log('3D buildings loaded');
-            }).catch(error => {
-              console.warn('Could not load 3D buildings:', error);
-          });
-        } else {
-            console.log('3D buildings not available in this Cesium version');
+          // Add Bing Maps imagery for better terrain visualization
+          if (window.Cesium.IonImageryProvider) {
+            viewer.imageryLayers.addImageryProvider(
+              new window.Cesium.IonImageryProvider({ assetId: 2 }) // Bing Maps
+            );
+            console.log('Bing Maps imagery loaded for terrain visualization');
+          } else {
+            console.log('Ion imagery provider not available, using default imagery');
           }
         } catch (error) {
-          console.warn('3D buildings setup error:', error);
+          console.warn('Imagery setup error:', error);
         }
 
-        // Enable enhanced lighting
-        viewer.scene.globe.enableLighting = true;
-        viewer.scene.globe.dynamicAtmosphereLighting = true;
-        viewer.scene.globe.atmosphereLightIntensity = 10.0;
+        // Enhanced lighting settings are now in the optimized rendering section below
+        viewer.scene.globe.atmosphereMieCoefficient = new window.Cesium.Cartesian3(21e-6, 21e-6, 21e-6);
+        viewer.scene.globe.atmosphereMieScaleHeight = 8.0;
+        viewer.scene.globe.atmosphereRayleighCoefficient = new window.Cesium.Cartesian3(5.5e-6, 13.0e-6, 28.4e-6);
 
-        // Enable fog for depth perception
+        // Enable fog for better depth perception
         viewer.scene.fog.enabled = true;
-        viewer.scene.fog.density = 0.0002;
+        viewer.scene.fog.density = 0.0001;
         viewer.scene.fog.screenSpaceErrorFactor = 2.0;
+        viewer.scene.fog.minimumBrightness = 0.03;
+
+        // Enable better shadows and lighting
+        viewer.scene.shadowMap.enabled = true;
+        viewer.scene.shadowMap.softShadows = true;
+        viewer.scene.shadowMap.size = 2048;
 
         // Enable post-processing effects for better visuals
         viewer.scene.postProcessStages.fxaa.enabled = true;
         viewer.scene.postProcessStages.fxaa.edgeThreshold = 0.1;
         viewer.scene.postProcessStages.fxaa.edgeThresholdMin = 0.05;
 
-        // Set better rendering quality
-        viewer.scene.globe.maximumScreenSpaceError = 1.0;
-        viewer.scene.globe.tileCacheSize = 1000;
+        // Set optimized rendering quality for faster loading and fix tile gaps
+        viewer.scene.globe.maximumScreenSpaceError = 2.0; // Lower quality for faster loading
+        viewer.scene.globe.tileCacheSize = 2000; // Increased cache to prevent tile gaps
+        viewer.scene.globe.preloadSiblings = true; // Preload adjacent tiles to prevent gaps
+        viewer.scene.globe.preloadAncestors = true; // Preload parent tiles for better coverage
+        viewer.scene.globe.enableLighting = true;
+        viewer.scene.globe.dynamicAtmosphereLighting = true;
+        viewer.scene.globe.atmosphereLightIntensity = 15.0;
+        
+        // Fix terrain gaps and holes
+        viewer.scene.globe.showGroundAtmosphere = true;
+        viewer.scene.globe.showSkyAtmosphere = true;
+        viewer.scene.globe.atmosphereMieCoefficient = new window.Cesium.Cartesian3(21e-6, 21e-6, 21e-6);
+        viewer.scene.globe.atmosphereMieScaleHeight = 8.0;
+        viewer.scene.globe.atmosphereRayleighCoefficient = new window.Cesium.Cartesian3(5.5e-6, 13.0e-6, 28.4e-6);
+        
+        // Optimize rendering performance
+        viewer.scene.requestRenderMode = false; // Disable request render mode for better performance
+        viewer.scene.maximumRenderTimeChange = 0.0; // Allow unlimited render time changes
+        viewer.scene.fog.enabled = true;
+        viewer.scene.fog.density = 0.0002;
+        viewer.scene.fog.screenSpaceErrorFactor = 2.0;
 
-        // Configure camera controls for ATC-style side view
-        const controller = viewer.scene.screenSpaceCameraController;
+      // Configure camera controls for better 3D navigation
+      const controller = viewer.scene.screenSpaceCameraController;
+      
+      // Allow tilting and rotation for full 3D control
+      controller.enableTilt = true;
+      controller.enableLook = true;
+      controller.enableRotate = true;
+      controller.enableTranslate = true;
+      controller.enableZoom = true;
+      
+      // Set pitch limits for better 3D viewing
+      controller.minimumPitch = window.Cesium.Math.toRadians(-90.0); // look straight down
+      controller.maximumPitch = window.Cesium.Math.toRadians(90.0);  // look straight up
+      
+      // Configure mouse controls for X/Y movement (pan and rotate)
+      controller.tiltEventTypes = [
+        window.Cesium.CameraEventType.LEFT_DRAG,
+        window.Cesium.CameraEventType.MIDDLE_DRAG
+      ];
+      
+      // Configure zoom controls (two fingers/pinch)
+      controller.zoomEventTypes = [
+        window.Cesium.CameraEventType.WHEEL,
+        window.Cesium.CameraEventType.PINCH
+      ];
+      
+      // Right-click drag for vertical panning (look up/down)
+      controller.lookEventTypes = [
+        {
+          eventType: window.Cesium.CameraEventType.RIGHT_DRAG,
+          modifier: window.Cesium.KeyboardEventModifier.NONE
+        }
+      ];
+      
+      // Configure mouse controls for better navigation
+      // Left click + drag: rotate around center
+      // Right click + drag: look up/down (pitch)
+      // Middle click + drag: pan
+      // Scroll wheel: zoom
+      
+      console.log('Camera controls configured: Mouse for X/Y movement, right-click for vertical panning, scroll for zoom');
         
-        // Allow tilting (default is restricted)
-        controller.enableTilt = true;
-        
-        // Allow panning (drag camera without orbiting)
-        controller.enableTranslate = true;
-        
-        // Set pitch (tilt up/down) limits for globe view
-        controller.minimumPitch = window.Cesium.Math.toRadians(-90.0); // look straight down
-        controller.maximumPitch = window.Cesium.Math.toRadians(0.0);   // horizon
-        
-        console.log('Camera controls configured:', {
-          enableTilt: controller.enableTilt,
-          enableTranslate: controller.enableTranslate,
-          minPitch: controller.minimumPitch,
-          maxPitch: controller.maximumPitch
-        });
-        
-        // Set initial camera to show the whole globe
+        // Set initial camera to show the entire globe over North America
         setTimeout(() => {
           viewer.camera.setView({
-            destination: window.Cesium.Cartesian3.fromDegrees(0, 0, 20000000), // Center of globe, high altitude
+            destination: window.Cesium.Cartesian3.fromDegrees(-100, 40, 15000000), // North America view
             orientation: {
               heading: window.Cesium.Math.toRadians(0.0),   // face north
-              pitch: window.Cesium.Math.toRadians(-90.0),   // look straight down at globe
+              pitch: window.Cesium.Math.toRadians(-90.0),   // top-down view to see Earth
               roll: 0.0
             }
           });
-          console.log('Initial camera view set to show whole globe');
+          console.log('Initial camera view set to show entire globe over North America with top-down view');
         }, 100);
 
         viewerRef.current = viewer;
+
+        // Save camera state when user navigates away
+        const saveCameraState = () => {
+          if (viewer && !viewer.isDestroyed()) {
+            const cameraState = {
+              position: viewer.camera.positionWC,
+              direction: viewer.camera.directionWC,
+              up: viewer.camera.upWC,
+              right: viewer.camera.rightWC
+            };
+            localStorage.setItem('cesiumCamera', JSON.stringify(cameraState));
+            console.log('Camera state saved to localStorage');
+          }
+        };
+
+        // Restore camera state if available
+        const restoreCameraState = () => {
+          try {
+            const saved = localStorage.getItem('cesiumCamera');
+            if (saved && viewer && !viewer.isDestroyed()) {
+              const state = JSON.parse(saved);
+              viewer.camera.setView({
+                destination: new window.Cesium.Cartesian3(
+                  state.position.x,
+                  state.position.y,
+                  state.position.z
+                ),
+                orientation: {
+                  direction: new window.Cesium.Cartesian3(
+                    state.direction.x,
+                    state.direction.y,
+                    state.direction.z
+                  ),
+                  up: new window.Cesium.Cartesian3(state.up.x, state.up.y, state.up.z),
+                  right: new window.Cesium.Cartesian3(state.right.x, state.right.y, state.right.z)
+                }
+              });
+              console.log('Camera state restored from localStorage');
+            }
+          } catch (error) {
+            console.warn('Failed to restore camera state:', error);
+          }
+        };
+
+        // Restore camera state after a short delay
+        setTimeout(restoreCameraState, 1000);
+
+        // Save camera state when component unmounts
+        const handleBeforeUnload = () => {
+          saveCameraState();
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
 
         // Ensure canvas size is valid and reacts to layout
         const handleResize = () => {
@@ -236,11 +382,10 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
       return R * c <= radiusKm;
     };
 
-    // Validate and cap dataset size to prevent rendering issues
+    // Validate aircraft data but don't artificially limit count
     const safeAircraft = aircraftData
       .filter(a => a && Number.isFinite(a.latitude) && Number.isFinite(a.longitude)
-        && a.latitude >= -90 && a.latitude <= 90 && a.longitude >= -180 && a.longitude <= 180)
-      .slice(0, 2000);
+        && a.latitude >= -90 && a.latitude <= 90 && a.longitude >= -180 && a.longitude <= 180);
 
     let addedCount = 0;
     safeAircraft.forEach((aircraft, index) => {
@@ -274,25 +419,55 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
         try {
           const altitudeMeters = Number.isFinite(aircraft.altitude) ? Math.max(0, aircraft.altitude * 0.3048 + 100) : 100;
           const labelText = (aircraft.callsign ?? aircraft.tag ?? aircraft.id ?? `A${index + 1}`) + '';
-      viewer.entities.add({
-        position: window.Cesium.Cartesian3.fromDegrees(
-          aircraft.longitude,
-          aircraft.latitude,
+          
+          // Determine aircraft color based on altitude
+          let aircraftColor = window.Cesium.Color.YELLOW; // Default
+          if (altitudeMeters > 30000) {
+            aircraftColor = window.Cesium.Color.RED; // High altitude
+          } else if (altitudeMeters > 10000) {
+            aircraftColor = window.Cesium.Color.ORANGE; // Medium altitude
+          } else if (altitudeMeters > 3000) {
+            aircraftColor = window.Cesium.Color.YELLOW; // Low altitude
+          } else {
+            aircraftColor = window.Cesium.Color.GREEN; // Ground/low altitude
+          }
+          
+          // Add aircraft as 3D billboard with proper distance scaling
+          viewer.entities.add({
+            position: window.Cesium.Cartesian3.fromDegrees(
+              aircraft.longitude,
+              aircraft.latitude,
               altitudeMeters
-        ),
-        point: { 
-              pixelSize: 8, 
-          color: window.Cesium.Color.RED 
-        },
-        label: {
-              text: labelText.slice(0, 16),
-              font: '12px sans-serif',
-          fillColor: window.Cesium.Color.WHITE,
-          outlineColor: window.Cesium.Color.BLACK,
-              outlineWidth: 2,
-              pixelOffset: new window.Cesium.Cartesian2(0, -18),
+            ),
+            billboard: {
+              image: createAircraftIcon(aircraftColor),
+              width: 16,
+              height: 16,
+              verticalOrigin: window.Cesium.VerticalOrigin.BOTTOM,
+              scaleByDistance: new window.Cesium.NearFarScalar(500, 1.0, 20000, 0.6, 100000, 0.3, 300000, 0.1),
+              translucencyByDistance: new window.Cesium.NearFarScalar(500, 1.0, 50000, 0.8, 150000, 0.4, 300000, 0.1)
+            },
+            point: { 
+              pixelSize: 4, 
+              color: aircraftColor,
+              outlineColor: window.Cesium.Color.WHITE,
+              outlineWidth: 1,
+              heightReference: window.Cesium.HeightReference.RELATIVE_TO_GROUND,
+              scaleByDistance: new window.Cesium.NearFarScalar(500, 1.5, 20000, 0.8, 100000, 0.4, 300000, 0.2)
+            },
+            label: {
+              text: labelText.slice(0, 12),
+              font: 'bold 14px sans-serif',
+              fillColor: window.Cesium.Color.WHITE,
+              outlineColor: window.Cesium.Color.BLACK,
+              outlineWidth: 3,
+              pixelOffset: new window.Cesium.Cartesian2(0, -35), // Move further up
               style: window.Cesium.LabelStyle.FILL_AND_OUTLINE,
-              disableDepthTestDistance: Number.POSITIVE_INFINITY
+              disableDepthTestDistance: Number.POSITIVE_INFINITY,
+              scaleByDistance: new window.Cesium.NearFarScalar(1000, 1.0, 100000, 0.7),
+              heightReference: window.Cesium.HeightReference.NONE, // Don't clamp to ground
+              verticalOrigin: window.Cesium.VerticalOrigin.BOTTOM, // Anchor to bottom
+              horizontalOrigin: window.Cesium.HorizontalOrigin.CENTER // Center horizontally
             }
           });
           addedCount++;
@@ -314,6 +489,23 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
       entity.id && entity.id.toString().startsWith('airport-')
     );
     airportEntities.forEach(entity => viewer.entities.remove(entity));
+    
+    // If no airport is selected, force full earth view over North America
+    if (!selectedAirport) {
+      viewer.camera.flyTo({
+        destination: window.Cesium.Cartesian3.fromDegrees(-100, 40, 15000000), // North America view
+        orientation: {
+          heading: window.Cesium.Math.toRadians(0.0),   // face north
+          pitch: window.Cesium.Math.toRadians(-90.0),   // top-down view to see Earth
+          roll: 0.0
+        },
+        duration: 1.0,
+        complete: () => {
+          console.log('Forced full earth view over North America - no airport selected');
+        }
+      });
+      return;
+    }
     
     // Handle both string airport codes and airport objects
     let airportData = null;
@@ -392,35 +584,91 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
           ellipse: {
             semiMajorAxis: radius * 1000, // Convert km to meters
             semiMinorAxis: radius * 1000,
-            material: window.Cesium.Color.YELLOW.withAlpha(0.2),
+            material: window.Cesium.Color.TRANSPARENT, // No fill, just border
             outline: true,
             outlineColor: window.Cesium.Color.YELLOW,
+            outlineWidth: 3, // Make border more visible
             height: 0
           }
         });
       }
       
-      // Fly to airport with ATC-style camera positioning
-      viewer.camera.flyTo({
-        destination: window.Cesium.Cartesian3.fromDegrees(
-          lon,
-          lat,
-          radius ? Math.max(8000, radius * 800) : 15000 // Higher altitude for 3D buildings visibility
-        ),
-        orientation: {
-          heading: window.Cesium.Math.toRadians(0.0),   // face north
-          pitch: window.Cesium.Math.toRadians(-60.0),   // tilt 60° down from horizon (vertical ATC view)
-          roll: 0.0
-        },
-        duration: 3.0,
-        complete: () => {
-          console.log('Camera fly-to completed with 60° ATC tilt');
-        }
-      });
+      // Use globe transition approach: zoom out to globe, then zoom in to airport
+      const airportEntity = viewer.entities.getById('airport-marker');
+      if (airportEntity) {
+        const position = airportEntity.position.getValue(window.Cesium.JulianDate.now());
+        const targetDistance = radius ? Math.max(2000, radius * 100) : 5000;
+        
+        // First zoom out to entire globe with top-down view over North America
+        viewer.camera.flyTo({
+          destination: window.Cesium.Cartesian3.fromDegrees(-100, 40, 15000000), // North America view
+          orientation: {
+            heading: window.Cesium.Math.toRadians(0.0),
+            pitch: window.Cesium.Math.toRadians(-90.0), // Top-down view to see Earth
+            roll: 0.0
+          },
+          duration: 1.5, // 1.5 second zoom out
+          complete: () => {
+            console.log('Zoomed out to globe view over North America');
+            
+            // Then zoom in to the new airport
+            setTimeout(() => {
+              viewer.camera.flyTo({
+                destination: position,
+                orientation: {
+                  heading: window.Cesium.Math.toRadians(0.0),
+                  pitch: window.Cesium.Math.toRadians(-15.0),
+                  roll: 0.0
+                },
+                duration: 2.0, // 2 second zoom in
+                complete: () => {
+                  // Final precise positioning with lookAt
+                  viewer.camera.lookAt(
+                    position,
+                    new window.Cesium.HeadingPitchRange(
+                      window.Cesium.Math.toRadians(0.0),   // heading (rotation around entity)
+                      window.Cesium.Math.toRadians(-15.0), // pitch (shallower angle to see flights in air)
+                      targetDistance  // range (closer zoom for better detail)
+                    )
+                  );
+                  
+                  // Release the lock so you can move freely again
+                  viewer.camera.lookAtTransform(window.Cesium.Matrix4.IDENTITY);
+                  
+                  console.log(`Camera positioned using globe transition: ${targetDistance}m from airport with -15° shallow pitch`);
+                }
+              });
+            }, 500); // Small delay between zoom out and zoom in
+          }
+        });
+      } else {
+        console.warn('Airport entity not found for lookAt positioning');
+      }
     } else if (selectedAirport) {
       console.warn('Invalid airport coordinates:', selectedAirport);
     }
   }, [selectedAirport, radius]);
+
+  // Ensure globe view is always shown on initial load over North America
+  useEffect(() => {
+    if (viewerRef.current && !selectedAirport) {
+      const viewer = viewerRef.current;
+      viewer.camera.flyTo({
+        destination: window.Cesium.Cartesian3.fromDegrees(-100, 40, 15000000), // North America view
+        orientation: {
+          heading: window.Cesium.Math.toRadians(0.0),   // face north
+          pitch: window.Cesium.Math.toRadians(-90.0),   // top-down view to see Earth
+          roll: 0.0
+        },
+        duration: 0.5,
+        complete: () => {
+          console.log('Initial globe view over North America ensured');
+        }
+      });
+    }
+  }, [selectedAirport]);
+
+
 
     return (
     <div className="w-full h-full relative">
@@ -433,6 +681,8 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
           backgroundColor: '#1a1a1a'
         }}
       />
+      
+
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-900/80 z-20">
@@ -460,7 +710,6 @@ const Cesium3D = ({ selectedAirport, aircraftData, radius, onRadiusChange }) => 
       
       {!isLoading && !error && (
       <div className="absolute top-4 left-4 bg-black/50 text-white p-3 rounded-lg z-10">
-        <div className="text-sm font-medium">✅ NAVDA Active</div>
         <div className="text-xs text-gray-300">
             {selectedAirport ? `Tracking: ${typeof selectedAirport === 'string' ? airportCoordinates[selectedAirport]?.name || selectedAirport : selectedAirport.name || selectedAirport.code || 'Airport'}` : '3D Globe View'}
         </div>
