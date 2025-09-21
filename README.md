@@ -1,6 +1,8 @@
 # Navda
 
-![Tech Stack](navda_teckstack.jpg)
+<div align="center">
+  <img src="navda_teckstack.jpg" alt="Tech Stack" />
+</div>
 
 **Tech Stack:** React, Vite, TailwindCSS, Flask, Python, Cerebras AI, Three.js, Leaflet
 
