@@ -1,5 +1,10 @@
-# Navda
+## Navda
 
+<div align="center">
+  <img src="navda_3D_view.gif" alt="Tech Stack" />
+</div>
+
+### Tech Stack
 <div align="center">
   <img src="navda_teckstack.jpg" alt="Tech Stack" />
 </div>
