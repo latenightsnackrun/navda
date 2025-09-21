@@ -242,7 +242,7 @@ const StripColumn = ({ column, strips, onEdit, onRemoveTracon }) => {
 
 // Main Component
 const FlightStripsView = () => {
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(true);
   const [strips, setStrips] = useState([
     {
       id: 1,
@@ -290,7 +290,7 @@ const FlightStripsView = () => {
       fixes: 'DFW..LAX',
       eta: '15:45',
       notes: 'Request higher',
-      column: 'departure'
+      column: 'tower'
     },
     {
       id: 5,
@@ -303,6 +303,30 @@ const FlightStripsView = () => {
       eta: '13:15',
       notes: 'Weather deviation',
       column: 'tracon'
+    },
+    {
+      id: 6,
+      callsign: 'BAW789',
+      aircraft: 'A380',
+      squawk: '0789',
+      altitude: 'FL400',
+      route: 'EGLL → KJFK',
+      fixes: 'LHR..JFK',
+      eta: '16:30',
+      notes: 'Heavy, RWY 04R',
+      column: 'clearance'
+    },
+    {
+      id: 7,
+      callsign: 'AFR456',
+      aircraft: 'A350',
+      squawk: '0456',
+      altitude: 'FL380',
+      route: 'LFPG → KJFK',
+      fixes: 'CDG..JFK',
+      eta: '17:15',
+      notes: 'Request lower',
+      column: 'clearance'
     }
   ]);
 
@@ -314,7 +338,6 @@ const FlightStripsView = () => {
     { id: 'clearance', name: 'Clearance Delivery' },
     { id: 'ground', name: 'Ground Control' },
     { id: 'tower', name: 'Local Control' },
-    { id: 'departure', name: 'Flight Data Coor.' },
     { id: 'tracon', name: 'TRACON Handoff' }
   ];
 

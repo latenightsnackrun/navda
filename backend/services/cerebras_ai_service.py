@@ -34,6 +34,10 @@ class QueryTypeEnum(str, Enum):
     FILTER = "filter"
     SUMMARY = "summary"
     ALERT = "alert"
+    ACTION = "action"
+    ADD_TO_WATCHLIST = "add_to_watchlist"
+    REMOVE_FROM_WATCHLIST = "remove_from_watchlist"
+    ANALYZE_SPECIFIC = "analyze_specific"
 
 @dataclass
 class AircraftMetrics:
@@ -59,6 +63,9 @@ class QueryResponse(BaseModel):
     total_matches: int = 0
     insights: List[str] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
+    actions: List[Dict] = Field(default_factory=list)  # Actions to perform
+    target_aircraft: Optional[Dict] = None  # Specific aircraft for actions
+    updated_context: Optional[Dict] = None  # Updated conversation context
 
 class CerebrasAIService:
     """
@@ -80,6 +87,13 @@ class CerebrasAIService:
         # Aircraft data cache
         self.aircraft_cache = {}
         self.pattern_history = {}
+        
+        # Context memory for conversation
+        self.conversation_context = {
+            "last_mentioned_aircraft": None,
+            "last_query_type": None,
+            "recent_aircraft": []
+        }
         
     async def initialize(self):
         """Initialize the AI service with Cerebras and LangChain"""
@@ -163,7 +177,7 @@ class CerebrasAIService:
         
         # Natural Language Query Chain
         query_prompt = ChatPromptTemplate.from_messages([
-            ("system", """You are an intelligent ATC query processor. Parse natural language queries about aircraft data and provide structured responses.
+            ("system", """You are an intelligent ATC query processor and action executor. Parse natural language queries about aircraft data and provide structured responses with executable actions.
             
             You have access to comprehensive aircraft data including:
             - Position, altitude, speed, heading, vertical rate
@@ -181,7 +195,9 @@ class CerebrasAIService:
             - Summaries ("generate watchlist summary", "analyze traffic patterns")
             - Alerts ("critical aircraft", "emergency situations")
             - Performance analysis ("analyze climb rates", "check speed consistency")
+            - Actions ("add 233LA to watchlist", "analyze flight behavior of ABC123", "remove XYZ789 from watchlist")
             
+            For action queries, identify the specific aircraft by callsign, ICAO24, or registration and provide executable actions.
             Always provide actionable ATC insights based on ALL available data."""),
             ("user", """Process this query about aircraft data:
             
@@ -191,12 +207,14 @@ class CerebrasAIService:
             
             Provide response in this JSON format:
             {{
-                "query_type": "analysis|filter|summary|alert",
+                "query_type": "analysis|filter|summary|alert|action|add_to_watchlist|remove_from_watchlist|analyze_specific",
                 "response": "Clear natural language response",
                 "filtered_aircraft": [list of matching aircraft],
                 "total_matches": number,
                 "insights": ["key insights"],
-                "recommendations": ["actionable items"]
+                "recommendations": ["actionable items"],
+                "actions": [{{"type": "add_to_watchlist|remove_from_watchlist|analyze", "aircraft_icao24": "string"}}],
+                "target_aircraft": {{"icao24": "string", "callsign": "string"}}
             }}""")
         ])
         
@@ -312,6 +330,12 @@ class CerebrasAIService:
         try:
             # Pre-process query to determine intent
             query_intent = self._analyze_query_intent(query)
+            self.logger.log(LogLevel.INFO, "cerebras_ai", f"Query intent detected: '{query_intent}' for query: '{query}'")
+            
+            # Handle action-based queries
+            if query_intent in ['add_to_watchlist', 'remove_from_watchlist', 'analyze_specific']:
+                self.logger.log(LogLevel.INFO, "cerebras_ai", f"Routing to action handler for intent: {query_intent}")
+                return await self._handle_action_query(query, query_intent, aircraft_data, context)
             
             # Filter relevant aircraft based on query
             relevant_aircraft = await self._pre_filter_aircraft(query, aircraft_data)
@@ -351,6 +375,191 @@ class CerebrasAIService:
             self.logger.log(LogLevel.ERROR, "cerebras_ai", f"Query processing failed: {str(e)}")
             return self._create_fallback_query_response(query, str(e), [])
     
+    async def _handle_action_query(self, query: str, intent: str, aircraft_data: List[Dict], context: Dict = None) -> QueryResponse:
+        """Handle action-based queries like adding/removing from watchlist"""
+        try:
+            self.logger.log(LogLevel.INFO, "cerebras_ai", f"Handling action query: '{query}' with intent: {intent}")
+            
+            # Get conversation context from request
+            conversation_context = context.get('conversation_context', {}) if context else {}
+            
+            # Check for context references first
+            query_lower = query.lower().strip()
+            aircraft_identifier = None
+            
+            # Handle context references like "add it", "analyze that", etc.
+            if any(ref in query_lower for ref in ['it', 'that', 'this', 'the last one', 'previous']):
+                if conversation_context.get("lastMentionedAircraft"):
+                    aircraft_identifier = conversation_context["lastMentionedAircraft"]
+                    self.logger.log(LogLevel.INFO, "cerebras_ai", f"Using context reference: {aircraft_identifier}")
+                else:
+                    return QueryResponse(
+                        query_type=QueryTypeEnum.ACTION,
+                        response="No previous aircraft mentioned. Please specify a callsign, ICAO24, or registration.",
+                        filtered_aircraft=[],
+                        total_matches=0,
+                        insights=["Use format: 'add ABC123 to watchlist' or 'analyze flight behavior of XYZ789'"],
+                        recommendations=["Specify aircraft by callsign, ICAO24, or registration"]
+                    )
+            
+            # Extract aircraft identifier from query - improved logic
+            if not aircraft_identifier:
+                words = query.split()
+                
+                # Look for aircraft identifiers in the query
+                for word in words:
+                    # Clean the word (remove punctuation)
+                    clean_word = ''.join(c for c in word if c.isalnum())
+                    if len(clean_word) >= 3:  # Aircraft identifiers are usually 3+ characters
+                        found_aircraft = self._find_aircraft_by_identifier(clean_word, aircraft_data)
+                        if found_aircraft:
+                            aircraft_identifier = clean_word
+                            break
+            
+            # If still not found, try to extract from common patterns
+            if not aircraft_identifier:
+                import re
+                # Look for patterns like "233LA", "ABC123", "N123AB", etc.
+                patterns = [
+                    r'\b\d{2,3}[A-Z]{2,3}\b',         # Like 233LA, 123AB
+                    r'\b[A-Z]{2,3}\d{2,4}[A-Z]?\b',    # Like ABC123, 223LA
+                    r'\b[A-Z]\d{2,4}[A-Z]{1,3}\b',     # Like N123AB
+                    r'\b[A-Z]{3,6}\d{2,4}\b',          # Like SWA1234
+                    r'\b[A-Z]{2,4}\d{2,4}[A-Z]?\b',    # Like AC1234
+                    r'\b[A-Z]{2,6}\b',                 # Like SWA, UAL, etc.
+                    r'\b[A-Z]\d{2,4}\b'                # Like A123, B456
+                ]
+                
+                for pattern in patterns:
+                    matches = re.findall(pattern, query.upper())
+                    for match in matches:
+                        found_aircraft = self._find_aircraft_by_identifier(match, aircraft_data)
+                        if found_aircraft:
+                            aircraft_identifier = match
+                            break
+                    if aircraft_identifier:
+                        break
+            
+            if not aircraft_identifier:
+                # Get available aircraft for suggestions
+                available_callsigns = [ac.get('callsign', 'N/A') for ac in aircraft_data[:10] if ac.get('callsign')]
+                suggestions_text = f"Available aircraft: {', '.join(available_callsigns[:5])}" if available_callsigns else "No aircraft data available"
+                
+                return QueryResponse(
+                    query_type=QueryTypeEnum.ACTION,
+                    response=f"Could not find aircraft '{query}' in current data.\n\n{suggestions_text}\n\nTry using one of the available callsigns above.",
+                    filtered_aircraft=aircraft_data[:5],  # Show some available aircraft
+                    total_matches=len(aircraft_data[:5]),
+                    insights=["Aircraft may not be in range or may have landed", f"Found {len(aircraft_data)} total aircraft in area"],
+                    recommendations=["Use exact callsign from available aircraft", "Check if aircraft is in range"]
+                )
+            
+            target_aircraft = self._find_aircraft_by_identifier(aircraft_identifier, aircraft_data)
+            self.logger.log(LogLevel.INFO, "cerebras_ai", f"Found aircraft identifier: '{aircraft_identifier}', target_aircraft: {target_aircraft is not None}")
+            
+            if not target_aircraft:
+                return QueryResponse(
+                    query_type=QueryTypeEnum.ACTION,
+                    response=f"Aircraft '{aircraft_identifier}' not found in current data.",
+                    filtered_aircraft=[],
+                    total_matches=0,
+                    insights=["Aircraft may not be in range or may have landed"],
+                    recommendations=["Check aircraft callsign, ICAO24, or registration"]
+                )
+            
+            # Update conversation context for future references
+            updated_context = {
+                "lastMentionedAircraft": aircraft_identifier,
+                "lastQueryType": intent,
+                "recentAircraft": conversation_context.get("recentAircraft", [])
+            }
+            
+            # Add current aircraft to recent list if not already there
+            if target_aircraft not in updated_context["recentAircraft"]:
+                updated_context["recentAircraft"].append(target_aircraft)
+                # Keep only last 5 aircraft
+                updated_context["recentAircraft"] = updated_context["recentAircraft"][-5:]
+            
+            # Generate appropriate response based on intent
+            if intent == 'add_to_watchlist':
+                callsign = target_aircraft.get('callsign', aircraft_identifier)
+                altitude = target_aircraft.get('altitude', 0)
+                speed = target_aircraft.get('velocity', 0)
+                
+                # Create more intelligent response
+                response_text = f"Ready to add {callsign} to watchlist for monitoring."
+                
+                # Add flight phase analysis
+                if altitude > 30000:
+                    response_text += f"\n\n{callsign} is at cruise altitude ({altitude:,}ft) at {speed}kt"
+                elif altitude > 10000:
+                    response_text += f"\n\n{callsign} is in climb/descent phase ({altitude:,}ft) at {speed}kt"
+                else:
+                    response_text += f"\n\n{callsign} is in approach phase ({altitude:,}ft) at {speed}kt"
+                
+                return QueryResponse(
+                    query_type=QueryTypeEnum.ADD_TO_WATCHLIST,
+                    response=response_text,
+                    filtered_aircraft=[target_aircraft],
+                    total_matches=1,
+                    actions=[{"type": "add_to_watchlist", "aircraft_icao24": target_aircraft.get('icao24')}],
+                    target_aircraft=target_aircraft,
+                    updated_context=updated_context,
+                    insights=[f"Aircraft: {callsign}", 
+                             f"Altitude: {altitude:,}ft",
+                             f"Speed: {speed}kt",
+                             f"Phase: {'Cruise' if altitude > 30000 else 'Climb/Descent' if altitude > 10000 else 'Approach'}"],
+                    recommendations=["Aircraft will be added to watchlist for continuous monitoring"]
+                )
+            
+            elif intent == 'remove_from_watchlist':
+                return QueryResponse(
+                    query_type=QueryTypeEnum.REMOVE_FROM_WATCHLIST,
+                    response=f"Ready to remove {target_aircraft.get('callsign', aircraft_identifier)} from watchlist.",
+                    filtered_aircraft=[target_aircraft],
+                    total_matches=1,
+                    actions=[{"type": "remove_from_watchlist", "aircraft_icao24": target_aircraft.get('icao24')}],
+                    target_aircraft=target_aircraft,
+                    insights=[f"Aircraft: {target_aircraft.get('callsign', 'Unknown')}"],
+                    recommendations=["Aircraft will be removed from watchlist"]
+                )
+            
+            elif intent == 'analyze_specific':
+                return QueryResponse(
+                    query_type=QueryTypeEnum.ANALYZE_SPECIFIC,
+                    response=f"🔍 Analyzing flight behavior of {target_aircraft.get('callsign', aircraft_identifier)}...",
+                    filtered_aircraft=[target_aircraft],
+                    total_matches=1,
+                    actions=[{"type": "analyze", "aircraft_icao24": target_aircraft.get('icao24')}],
+                    target_aircraft=target_aircraft,
+                    insights=[f"Aircraft: {target_aircraft.get('callsign', 'Unknown')}", 
+                             f"Current altitude: {target_aircraft.get('altitude', 'N/A')}ft",
+                             f"Current speed: {target_aircraft.get('velocity', 'N/A')}kt",
+                             f"Vertical rate: {target_aircraft.get('vertical_rate', 'N/A')} ft/min"],
+                    recommendations=["Performing detailed behavior analysis"]
+                )
+            
+            else:
+                return QueryResponse(
+                    query_type=QueryTypeEnum.ACTION,
+                    response=f"❓ Action not recognized: {intent}",
+                    filtered_aircraft=[],
+                    total_matches=0,
+                    insights=["Supported actions: add to watchlist, remove from watchlist, analyze specific aircraft"],
+                    recommendations=["Use clear action commands"]
+                )
+                
+        except Exception as e:
+            self.logger.log(LogLevel.ERROR, "cerebras_ai", f"Action query handling failed: {str(e)}")
+            return QueryResponse(
+                query_type=QueryTypeEnum.ACTION,
+                response=f"Action processing failed: {str(e)}",
+                filtered_aircraft=[],
+                total_matches=0,
+                insights=["Please try again with a clearer command"],
+                recommendations=["Use format: 'add ABC123 to watchlist' or 'analyze XYZ789'"]
+            )
+    
     async def generate_incident_summary(self, aircraft_data: Dict, analysis: AircraftAnalysis) -> str:
         """Generate concise ATC incident summary"""
         await self.initialize()
@@ -360,11 +569,11 @@ class CerebrasAIService:
             
             # Use a simple template for summaries
             if analysis.status == AircraftStatusEnum.CRITICAL:
-                template = f"🚨 CRITICAL: Flight {callsign} - {analysis.summary}"
+                template = f"CRITICAL: Flight {callsign} - {analysis.summary}"
             elif analysis.status == AircraftStatusEnum.CONCERNING:
-                template = f"⚠️ ALERT: Flight {callsign} - {analysis.summary}"
+                template = f"ALERT: Flight {callsign} - {analysis.summary}"
             else:
-                template = f"✅ NORMAL: Flight {callsign} - {analysis.summary}"
+                template = f"NORMAL: Flight {callsign} - {analysis.summary}"
             
             return template
             
@@ -449,20 +658,107 @@ class CerebrasAIService:
         return min(score, 1.0)
     
     def _analyze_query_intent(self, query: str) -> str:
-        """Analyze query intent"""
-        query_lower = query.lower()
+        """Analyze query intent with improved natural language understanding"""
+        query_lower = query.lower().strip()
         
-        if any(word in query_lower for word in ['filter', 'show', 'find', 'list']):
-            return 'filter'
-        elif any(word in query_lower for word in ['analyze', 'behavior', 'pattern']):
+        # Action-based queries - check for specific patterns first
+        if ('add' in query_lower and 'watchlist' in query_lower) or ('add' in query_lower and 'monitor' in query_lower):
+            return 'add_to_watchlist'
+        elif ('add' in query_lower and any(ref in query_lower for ref in ['it', 'that', 'this', 'the last one', 'previous'])):
+            return 'add_to_watchlist'
+        elif ('remove' in query_lower and 'watchlist' in query_lower) or ('remove' in query_lower and 'from' in query_lower):
+            return 'remove_from_watchlist'
+        elif ('remove' in query_lower and any(ref in query_lower for ref in ['it', 'that', 'this', 'the last one', 'previous'])):
+            return 'remove_from_watchlist'
+        elif ('analyze' in query_lower and ('behavior' in query_lower or 'flight' in query_lower or 'of' in query_lower)):
+            return 'analyze_specific'
+        elif ('analyze' in query_lower and any(ref in query_lower for ref in ['it', 'that', 'this', 'the last one', 'previous'])):
+            return 'analyze_specific'
+        
+        # Specific aircraft analysis queries
+        elif any(phrase in query_lower for phrase in [
+            'tell me about', 'analyze', 'show me', 'what about', 'info about'
+        ]):
             return 'analysis'
-        elif any(word in query_lower for word in ['summary', 'report', 'overview']):
+        
+        # Summary and overview queries
+        elif any(phrase in query_lower for phrase in [
+            'summary', 'overview', 'at least give me a summary', 'give me a summary',
+            'show me a summary', 'aircraft summary', 'traffic summary'
+        ]):
             return 'summary'
-        elif any(word in query_lower for word in ['alert', 'critical', 'emergency', 'concern']):
+        
+        # Filter and search queries
+        elif any(phrase in query_lower for phrase in [
+            'show me', 'find', 'list', 'filter', 'search', 'airborne aircraft',
+            'show some', 'give me some', 'at least give me'
+        ]):
+            return 'filter'
+        
+        # Analysis queries
+        elif any(word in query_lower for word in ['analyze', 'behavior', 'pattern', 'analysis']):
+            return 'analysis'
+        
+        # Alert queries
+        elif any(word in query_lower for word in ['alert', 'critical', 'emergency', 'concern', 'problem']):
             return 'alert'
+        
+        # Default to general
         else:
             return 'general'
     
+    def _find_aircraft_by_identifier(self, query: str, aircraft_data: List[Dict]) -> Optional[Dict]:
+        """Find aircraft by callsign, ICAO24, or registration with improved matching"""
+        query_upper = query.upper().strip()
+        
+        # Try exact matches first
+        for aircraft in aircraft_data:
+            if aircraft.get('callsign') and aircraft.get('callsign').upper().strip() == query_upper:
+                return aircraft
+        
+        for aircraft in aircraft_data:
+            if aircraft.get('icao24') and aircraft.get('icao24').upper().strip() == query_upper:
+                return aircraft
+        
+        for aircraft in aircraft_data:
+            if aircraft.get('registration') and aircraft.get('registration').upper().strip() == query_upper:
+                return aircraft
+        
+        # Try partial matches (substring)
+        for aircraft in aircraft_data:
+            callsign = aircraft.get('callsign', '').upper().strip()
+            icao24 = aircraft.get('icao24', '').upper().strip()
+            registration = aircraft.get('registration', '').upper().strip()
+            
+            if (callsign and query_upper in callsign) or \
+               (icao24 and query_upper in icao24) or \
+               (registration and query_upper in registration):
+                return aircraft
+        
+        # Try fuzzy matching for similar callsigns
+        for aircraft in aircraft_data:
+            callsign = aircraft.get('callsign', '').upper().strip()
+            if callsign and self._fuzzy_match(query_upper, callsign):
+                return aircraft
+        
+        return None
+    
+    def _fuzzy_match(self, query: str, callsign: str) -> bool:
+        """Simple fuzzy matching for aircraft callsigns"""
+        if len(query) < 3 or len(callsign) < 3:
+            return False
+        
+        # Check if query is contained in callsign or vice versa
+        if query in callsign or callsign in query:
+            return True
+        
+        # Check for similar patterns (e.g., "233LA" vs "223LA")
+        if len(query) == len(callsign):
+            differences = sum(1 for a, b in zip(query, callsign) if a != b)
+            return differences <= 1  # Allow 1 character difference
+        
+        return False
+
     async def _pre_filter_aircraft(self, query: str, aircraft_data: List[Dict]) -> List[Dict]:
         """Pre-filter aircraft based on query keywords"""
         query_lower = query.lower()
@@ -542,24 +838,104 @@ class CerebrasAIService:
         )
     
     def _create_fallback_query_response(self, query: str, error: str = None, filtered_aircraft: List[Dict] = None) -> QueryResponse:
-        """Create fallback query response"""
+        """Create fallback query response with intelligent local analysis"""
         filtered = filtered_aircraft or []
+        query_lower = query.lower()
         
-        response_text = f"Query processed locally: '{query}'\n\n"
+        # Enhanced local analysis based on query type
+        if 'summary' in query_lower or 'overview' in query_lower:
+            if filtered:
+                altitudes = [a.get('altitude', 0) for a in filtered if a.get('altitude') and a.get('altitude') > 0]
+                speeds = [a.get('velocity', 0) for a in filtered if a.get('velocity') and a.get('velocity') > 0]
+                airborne = [a for a in filtered if not a.get('on_ground', True) and a.get('altitude', 0) > 0]
+                on_ground = [a for a in filtered if a.get('on_ground', True) or a.get('altitude', 0) <= 0]
+                
+                response_text = f"Aircraft Summary:\n\n"
+                response_text += f"• Total aircraft: {len(filtered)}\n"
+                response_text += f"• Airborne: {len(airborne)} aircraft\n"
+                response_text += f"• On ground: {len(on_ground)} aircraft\n"
+                
+                if altitudes:
+                    response_text += f"• Altitude range: {min(altitudes):,}ft - {max(altitudes):,}ft (avg: {sum(altitudes)/len(altitudes):.0f}ft)\n"
+                
+                if speeds:
+                    response_text += f"• Speed range: {min(speeds):.0f}kt - {max(speeds):.0f}kt (avg: {sum(speeds)/len(speeds):.0f}kt)\n"
+                
+                # Add aircraft examples with more detail
+                response_text += f"\nSample aircraft:\n"
+                for aircraft in filtered[:5]:
+                    callsign = aircraft.get('callsign', 'Unknown')
+                    altitude = aircraft.get('altitude', 0)
+                    speed = aircraft.get('velocity', 0)
+                    on_ground = aircraft.get('on_ground', True)
+                    status = "Ground" if on_ground else "Airborne"
+                    response_text += f"• {callsign} - {altitude:,}ft, {speed:.0f}kt {status}\n"
+            else:
+                response_text = "No aircraft data available for summary."
         
-        if filtered:
-            response_text += f"Found {len(filtered)} matching aircraft based on simple filtering.\n"
-            response_text += "Note: Advanced AI analysis is not available."
+        elif 'tell me about' in query_lower or 'analyze' in query_lower:
+            # Try to find specific aircraft mentioned
+            words = query.split()
+            mentioned_aircraft = None
+            for word in words:
+                clean_word = ''.join(c for c in word if c.isalnum())
+                if len(clean_word) >= 3:
+                    found = self._find_aircraft_by_identifier(clean_word, filtered)
+                    if found:
+                        mentioned_aircraft = found
+                        break
+            
+            if mentioned_aircraft:
+                callsign = mentioned_aircraft.get('callsign', 'Unknown')
+                altitude = mentioned_aircraft.get('altitude', 0)
+                speed = mentioned_aircraft.get('velocity', 0)
+                heading = mentioned_aircraft.get('heading', 0)
+                on_ground = mentioned_aircraft.get('on_ground', True)
+                
+                response_text = f"Aircraft Analysis: {callsign}\n\n"
+                response_text += f"• Status: {'On Ground' if on_ground else 'Airborne'}\n"
+                response_text += f"• Altitude: {altitude:,}ft\n"
+                response_text += f"• Speed: {speed:.0f}kt\n"
+                response_text += f"• Heading: {heading:.0f}°\n"
+                
+                # Add flight phase analysis
+                if not on_ground and altitude > 0:
+                    if altitude > 30000:
+                        response_text += f"• Phase: Cruise altitude\n"
+                    elif altitude > 10000:
+                        response_text += f"• Phase: Climb/Descent\n"
+                    else:
+                        response_text += f"• Phase: Approach\n"
+                
+                response_text += f"\nThis aircraft is currently {'on the ground' if on_ground else 'in flight'}."
+            else:
+                response_text = f"Query processed: '{query}'\n\n"
+                response_text += f"Found {len(filtered)} matching aircraft:\n"
+                for aircraft in filtered[:5]:
+                    callsign = aircraft.get('callsign', 'Unknown')
+                    altitude = aircraft.get('altitude', 0)
+                    speed = aircraft.get('velocity', 0)
+                    response_text += f"• {callsign} - {altitude:,}ft, {speed:.0f}kt\n"
         else:
-            response_text += "Basic filtering applied. For advanced analysis, please configure AI service."
+            response_text = f"Query processed: '{query}'\n\n"
+            
+            if filtered:
+                response_text += f"Found {len(filtered)} matching aircraft:\n"
+                for aircraft in filtered[:5]:
+                    callsign = aircraft.get('callsign', 'Unknown')
+                    altitude = aircraft.get('altitude', 0)
+                    speed = aircraft.get('velocity', 0)
+                    response_text += f"• {callsign} - {altitude:,}ft, {speed:.0f}kt\n"
+            else:
+                response_text += "No aircraft found matching your criteria."
         
         return QueryResponse(
             query_type=QueryTypeEnum.ANALYSIS,
             response=response_text,
             filtered_aircraft=filtered,
             total_matches=len(filtered),
-            insights=["Using local filtering only", "AI service not configured"],
-            recommendations=["Configure CEREBRAS_API_KEY or OPENAI_API_KEY for advanced analysis"]
+            insights=["Using enhanced local analysis", "AI service not configured"],
+            recommendations=["Configure API keys for advanced AI analysis"]
         )
 
 # Create singleton instance

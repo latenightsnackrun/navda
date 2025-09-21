@@ -16,7 +16,7 @@ from services.aircraft_tracking import AircraftTrackingService
 from services.websocket_service import WebSocketService
 from services.agent_coordinator import AgentCoordinator
 from services.logging_service import logging_service, LogLevel
-from services.simple_ai_service import simple_ai_service
+from services.cerebras_ai_service import cerebras_ai_service
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -896,7 +896,7 @@ def analyze_aircraft():
         
         try:
             analysis = loop.run_until_complete(
-                simple_ai_service.analyze_aircraft_behavior(aircraft_data, context)
+                cerebras_ai_service.analyze_aircraft_behavior(aircraft_data, context)
             )
             
             # Convert to dict for JSON serialization
@@ -948,7 +948,7 @@ def process_natural_language_query():
         
         try:
             result = loop.run_until_complete(
-                simple_ai_service.process_natural_language_query(query, aircraft_data, context)
+                cerebras_ai_service.process_natural_language_query(query, aircraft_data, context)
             )
             
             # Convert to dict for JSON serialization
@@ -958,7 +958,10 @@ def process_natural_language_query():
                 "filtered_aircraft": result.filtered_aircraft,
                 "total_matches": result.total_matches,
                 "insights": result.insights,
-                "recommendations": result.recommendations
+                "recommendations": result.recommendations,
+                "actions": result.actions if hasattr(result, 'actions') else [],
+                "target_aircraft": result.target_aircraft if hasattr(result, 'target_aircraft') else None,
+                "updated_context": result.updated_context if hasattr(result, 'updated_context') else None
             }
             
             return jsonify({
@@ -998,7 +1001,7 @@ def generate_incident_summary():
             }), 400
         
         # Create analysis object from dict
-        from services.simple_ai_service import AircraftAnalysis, AircraftStatusEnum
+        from services.cerebras_ai_service import AircraftAnalysis, AircraftStatusEnum
         
         analysis = AircraftAnalysis(
             status=AircraftStatusEnum(analysis_data.get('status', 'normal')),
@@ -1016,7 +1019,7 @@ def generate_incident_summary():
         
         try:
             summary = loop.run_until_complete(
-                simple_ai_service.generate_incident_summary(aircraft_data, analysis)
+                cerebras_ai_service.generate_incident_summary(aircraft_data, analysis)
             )
             
             return jsonify({

@@ -7,12 +7,18 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
   const [inputMessage, setInputMessage] = useState('');
   const [selectedAircraft, setSelectedAircraft] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [aiServiceAvailable, setAiServiceAvailable] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredAircraft, setFilteredAircraft] = useState([]);
   const [sortBy, setSortBy] = useState('callsign'); // callsign, altitude, speed, icao24
   const [altitudeHistory, setAltitudeHistory] = useState({}); // Track altitude history for each aircraft
   const [showGraph, setShowGraph] = useState(null); // Track which aircraft graph to show
+  const [conversationContext, setConversationContext] = useState({
+    lastMentionedAircraft: null,
+    lastQueryType: null,
+    recentAircraft: []
+  });
 
   // Add initial welcome message
   useEffect(() => {
@@ -326,6 +332,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
     }
     
     setIsAnalyzing(false);
+    setIsLoading(false);
   };
 
 
@@ -363,6 +370,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsAnalyzing(true);
+    setIsLoading(true);
 
     try {
       if (aiServiceAvailable) {
@@ -377,7 +385,8 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
             aircraft_data: aircraftData,
             context: {
               watchlist: watchlist,
-              selected_airport: selectedAirport
+              selected_airport: selectedAirport,
+              conversation_context: conversationContext
             }
           })
         });
@@ -387,6 +396,52 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
           const result = data.result;
           
           let responseText = result.response;
+          
+          // Handle action-based responses
+          if (result.actions && result.actions.length > 0) {
+            for (const action of result.actions) {
+              if (action.type === 'add_to_watchlist' && result.target_aircraft) {
+                // Add aircraft to watchlist
+                const aircraftToAdd = result.target_aircraft;
+                if (!watchlist.find(item => item.icao24 === aircraftToAdd.icao24)) {
+                  const watchItem = {
+                    ...aircraftToAdd,
+                    addedAt: new Date(),
+                    status: 'monitoring',
+                    reason: 'AI Assistant added',
+                    lastAnalysis: null
+                  };
+                  setWatchlist(prev => [...prev, watchItem]);
+                  
+                  // Add confirmation message
+                  const confirmationMessage = {
+                    id: Date.now() + 2,
+                    type: 'assistant',
+                    content: `✈️ Added ${aircraftToAdd.callsign || aircraftToAdd.icao24} to watchlist!`,
+                    timestamp: new Date()
+                  };
+                  setMessages(prev => [...prev, confirmationMessage]);
+                } else {
+                  responseText += `\n\n⚠️ ${aircraftToAdd.callsign || aircraftToAdd.icao24} is already in the watchlist.`;
+                }
+              } else if (action.type === 'remove_from_watchlist' && result.target_aircraft) {
+                // Remove aircraft from watchlist
+                const aircraftToRemove = result.target_aircraft;
+                setWatchlist(prev => prev.filter(item => item.icao24 !== aircraftToRemove.icao24));
+                
+                if (selectedAircraft && selectedAircraft.icao24 === aircraftToRemove.icao24) {
+                  setSelectedAircraft(null);
+                }
+                
+                responseText += `\n\n✈️ Removed ${aircraftToRemove.callsign || aircraftToRemove.icao24} from watchlist.`;
+              } else if (action.type === 'analyze' && result.target_aircraft) {
+                // Analyze specific aircraft
+                const aircraftToAnalyze = result.target_aircraft;
+                await analyzeAircraft(aircraftToAnalyze);
+                responseText += `\n\n🧠 Analysis initiated for ${aircraftToAnalyze.callsign || aircraftToAnalyze.icao24}.`;
+              }
+            }
+          }
           
           if (result.filtered_aircraft && result.filtered_aircraft.length > 0) {
             responseText += `\n\n📊 Found ${result.total_matches} matching aircraft:\n`;
@@ -410,6 +465,11 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
           };
 
           setMessages(prev => [...prev, assistantMessage]);
+          
+          // Update conversation context if provided
+          if (result.updated_context) {
+            setConversationContext(result.updated_context);
+          }
         } else {
           throw new Error('AI service error');
         }
@@ -438,6 +498,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
     }
 
     setIsAnalyzing(false);
+    setIsLoading(false);
   };
 
   const getStatusColor = (status) => {
@@ -815,27 +876,10 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
             Ask questions about aircraft patterns • Get intelligent insights • Monitor behavior
           </p>
           
-          {/* Quick Query Suggestions */}
-          <div className="mt-3 flex flex-wrap gap-2">
-            {[
-              'Show low altitude aircraft',
-              'Find high speed flights',
-              'Analyze watchlist',
-              'Generate summary'
-            ].map((suggestion, index) => (
-              <button
-                key={index}
-                onClick={() => setInputMessage(suggestion)}
-                className="px-2 py-1 text-xs bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+        <div className="flex-1 overflow-y-auto p-4 pb-20 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hover:scrollbar-thumb-gray-500" style={{ maxHeight: 'calc(100vh - 300px)' }}>
           {messages.map((message) => (
             <div
               key={message.id}
@@ -869,28 +913,28 @@ const WatchlistTab = ({ aircraftData, selectedAirport, watchlist, setWatchlist, 
             )}
         </div>
 
-        {/* Chat Input */}
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-700 bg-gray-800">
-          <div className="flex space-x-2">
+        {/* Chat Input - Fixed to bottom */}
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4 z-50">
+          <form onSubmit={handleSendMessage} className="flex gap-2 max-w-4xl mx-auto">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask about aircraft behavior, patterns, or request analysis..."
-              className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              placeholder="Ask about aircraft behavior, add to watchlist, or request analysis..."
+              className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+              disabled={isLoading}
             />
             <button
               type="submit"
-              disabled={!inputMessage.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={!inputMessage.trim() || isLoading}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
             >
-              Send
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
             </button>
-          </div>
-          <div className="mt-2 text-xs text-gray-400">
-            Try: "Show me aircraft with unusual patterns" • "Analyze flight behavior" • "Generate summary"
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
       {/* Selected Aircraft Detail Panel (Optional Overlay) */}

@@ -590,3 +590,348 @@
 2025-09-21 03:22:10,328 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: 520PD - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
 2025-09-21 03:22:52,879 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: UAL1075 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
 2025-09-21 03:22:54,566 - avivato_atc - INFO - simple_ai - Aircraft analysis completed: KAL214 - AircraftStatusEnum.CONCERNING | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:46:04,953 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:46:04,955 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:46:04,957 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:46:04,958 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:46:05,484 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:46:05,484 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:46:05,485 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:46:05,486 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:49:11,806 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:49:11,807 - avivato_atc - INFO - simple_ai - Query processed: 'add some aircraft to the watchlist' -> 50 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:49:24,397 - avivato_atc - INFO - simple_ai - Query processed: 'add 233LA to the watchlist' -> 50 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:49:39,605 - avivato_atc - INFO - simple_ai - Query processed: 'analyze flight behavior of 233LA' -> 61 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:51:38,110 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:51:38,111 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:51:38,113 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:51:38,114 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:51:43,009 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:51:43,010 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:51:43,012 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:51:43,012 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:51:56,017 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:51:56,019 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:51:56,021 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:51:56,022 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:04,060 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:04,062 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:52:04,064 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:52:04,065 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:15,220 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:15,221 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:52:15,222 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:52:15,222 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:28,225 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:28,226 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:52:28,228 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:52:28,229 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:46,690 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:52:46,694 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:52:46,695 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:52:46,696 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:53:28,240 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:53:28,241 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:53:28,243 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:53:28,244 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:56:01,697 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:56:01,697 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 18 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:56:28,188 - avivato_atc - INFO - simple_ai - Query processed: 'show me some airborne aircraft' -> 18 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:57:46,537 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:57:46,538 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:57:46,540 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:57:46,540 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:00,517 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:00,518 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:00,521 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:00,523 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:05,866 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:05,866 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:05,867 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:05,869 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:11,700 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:11,700 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:11,702 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:11,703 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:16,471 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:16,472 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:16,473 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:16,474 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:20,518 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:20,519 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:20,522 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:20,523 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:25,809 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:58:25,810 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 1 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:58:38,565 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:38,567 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:38,569 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:38,569 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:39,941 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:58:39,941 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 1 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:58:44,947 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:44,948 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:58:44,950 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:58:44,951 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:58:50,183 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 1 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:58:53,270 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 1 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:59:00,103 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:00,104 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:59:00,105 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:59:00,107 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:05,129 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:05,130 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:59:05,132 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:59:05,133 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:06,008 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:06,009 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:59:06,011 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:59:06,012 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:10,188 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:59:10,188 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 1 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:59:20,256 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:20,258 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:59:20,261 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:59:20,261 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,079 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,079 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,080 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,081 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,925 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,926 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,928 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 03:59:33,928 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 03:59:38,444 - avivato_atc - INFO - simple_ai - Simple AI service initialized successfully | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 03:59:38,445 - avivato_atc - INFO - simple_ai - Query processed: 'add 223LA to watchlist' -> 1 matches | {"component": "simple_ai", "correlation_id": null, "data": null}
+2025-09-21 04:00:28,662 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:28,663 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:00:28,666 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:00:28,667 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,307 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,308 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,308 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,309 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,310 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,311 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,312 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:34,313 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:53,382 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:53,383 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:00:53,387 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:00:53,389 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:59,893 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:00:59,893 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:00:59,895 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:00:59,896 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:01:00,000 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:00,000 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:00,001 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 223LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:00,001 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:00,001 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 223LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:00,002 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '223LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:03,769 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analyze_specific' for query: 'analyze flight behavior of 223LA' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:03,770 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: analyze_specific | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:03,770 - avivato_atc - INFO - cerebras_ai - Handling action query: 'analyze flight behavior of 223LA' with intent: analyze_specific | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:03,771 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '223LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:01:18,404 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:01:18,406 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:01:18,409 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:01:18,410 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:01:31,898 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:01:31,904 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:01:31,908 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:01:31,912 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:06:13,271 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:13,271 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:13,271 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:13,272 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:13,272 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:27,420 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add a1ed21 to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:27,421 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:27,422 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add a1ed21 to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:27,423 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: 'a1ed21', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:35,787 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'general' for query: 'add it' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:06:52,279 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'summary' for query: 'at least give me a summary of airborne aircraft' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:08:25,148 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:08:25,150 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:08:25,151 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:08:25,151 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:08:48,068 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:08:48,069 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:08:48,070 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:08:48,072 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:09:12,968 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:09:12,970 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:09:12,972 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:09:12,972 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:09:40,706 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:09:40,708 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:09:40,709 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:09:40,710 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,048 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,050 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,052 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,053 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,130 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,131 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,132 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,132 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,133 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:00,133 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '233LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:03,950 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'general' for query: 'add it' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:10,275 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'summary' for query: 'at least give me a summary of airborne aircraft' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:10:57,205 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:10:57,206 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:10:57,207 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:10:57,207 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:10,321 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:10,322 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:11:10,324 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:11:10,324 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:22,453 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:22,453 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:11:22,455 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:11:22,455 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:26,147 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:26,148 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:26,148 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:26,148 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:26,148 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:26,149 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '233LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,606 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,609 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,613 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,614 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,713 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,714 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,714 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,722 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,723 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:48,725 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '233LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:11:53,461 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'general' for query: 'add it' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,840 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,844 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,848 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,849 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,994 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,996 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,998 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add it' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:21,999 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:22,000 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add it' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:22,002 - avivato_atc - INFO - cerebras_ai - Using context reference: 233LA | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:22,003 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '233LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:12:26,991 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'summary' for query: 'at least give me a summary of airborne aircraft' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:13:01,531 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:13:01,534 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:13:01,542 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:13:01,543 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:13:21,328 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:13:21,329 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:13:21,330 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:13:21,330 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:13:21,330 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:13:35,569 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'general' for query: 'tell me about 223LA' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:17:06,337 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:17:06,339 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:17:06,344 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:17:06,345 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:17:50,987 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:17:50,988 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:17:50,990 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:17:50,991 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:17:51,063 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:17:51,064 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:17:51,065 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:17:51,065 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:17:51,066 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:03,746 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'general' for query: 'tell me about EVA015' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,724 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,725 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,728 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,728 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,796 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,796 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:17,797 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analysis' for query: 'tell me about EVA015' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,731 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,732 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,734 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,734 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,806 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,807 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:29,807 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analysis' for query: 'tell me about EVA015' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:33,459 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add EVA015 to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:33,459 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:33,459 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add EVA015 to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:33,459 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: 'EVA015', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:37,377 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add it' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:37,377 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:37,377 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add it' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:37,377 - avivato_atc - INFO - cerebras_ai - Using context reference: EVA015 | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:19:37,378 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: 'EVA015', target_aircraft: False | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:10,269 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:20:10,272 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:20:10,277 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:20:10,278 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:20:27,214 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:27,215 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:27,215 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analysis' for query: 'tell me about 233LA' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:42,736 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 233LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:42,737 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:42,737 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 233LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:42,738 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '233LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:20:59,910 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'general' for query: 'Show low altitude aircraft' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:21:08,091 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'summary' for query: 'Generate summary' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:22:36,530 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:22:36,531 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:22:36,533 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:22:36,535 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:22:47,448 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:22:47,449 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:22:47,451 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:22:47,451 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:08,612 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:08,615 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:23:08,618 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:23:08,622 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:29,287 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:29,288 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:23:29,290 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:23:29,292 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:46,169 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:46,170 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:23:46,171 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:23:46,172 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:59,043 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:23:59,049 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:23:59,055 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:23:59,062 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:24:25,154 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:24:25,156 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:24:25,161 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:24:25,162 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:24:40,848 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:24:40,849 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:24:40,852 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:24:40,852 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:24:43,491 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:24:43,492 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:24:43,492 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add EVA015 to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:24:43,492 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:24:43,493 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add EVA015 to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:24:43,493 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: 'EVA015', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:24:47,534 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analysis' for query: 'tell me about EVA015' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:25:29,390 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:25:29,391 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 04:25:29,393 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 04:25:29,394 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 04:25:42,292 - avivato_atc - WARNING - cerebras_ai - No API keys found, using local analysis only | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:25:42,292 - avivato_atc - INFO - cerebras_ai - Cerebras AI service initialized successfully | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:25:42,293 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'remove_from_watchlist' for query: 'remove 223LA from watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:25:42,293 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: remove_from_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:25:42,293 - avivato_atc - INFO - cerebras_ai - Handling action query: 'remove 223LA from watchlist' with intent: remove_from_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:25:42,294 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '223LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:40:16,322 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'add_to_watchlist' for query: 'add 223LA to watchlist' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:40:16,322 - avivato_atc - INFO - cerebras_ai - Routing to action handler for intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:40:16,323 - avivato_atc - INFO - cerebras_ai - Handling action query: 'add 223LA to watchlist' with intent: add_to_watchlist | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:40:16,323 - avivato_atc - INFO - cerebras_ai - Found aircraft identifier: '223LA', target_aircraft: True | {"component": "cerebras_ai", "correlation_id": null, "data": null}
+2025-09-21 04:40:34,432 - avivato_atc - INFO - cerebras_ai - Query intent detected: 'analysis' for query: 'tell me about flight 448AN' | {"component": "cerebras_ai", "correlation_id": null, "data": null}
