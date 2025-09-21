@@ -32,7 +32,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
   useEffect(() => {
     const checkAIService = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/health');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/health`);
         if (response.ok) {
           setAiServiceAvailable(true);
           setMessages(prev => [...prev, {
@@ -257,7 +257,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         altitude_history: altitudeHistory[aircraft.icao24] || []
       };
 
-      const response = await fetch('http://localhost:5001/api/ai/analyze-aircraft', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/ai/analyze-aircraft`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -367,7 +367,7 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
     try {
       if (aiServiceAvailable) {
         // Use AI service for intelligent responses
-        const response = await fetch('http://localhost:5001/api/ai/process-query', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/ai/process-query`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

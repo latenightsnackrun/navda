@@ -5,7 +5,7 @@
 
 class AIService {
   constructor() {
-    this.baseUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001';
+    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
     this.isInitialized = false;
   }
 
