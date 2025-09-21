@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import AltitudeHistoryChart from './AltitudeHistoryChart';
 
 const WatchlistTab = ({ aircraftData, selectedAirport }) => {
   const [watchlist, setWatchlist] = useState([]);
@@ -10,6 +11,8 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredAircraft, setFilteredAircraft] = useState([]);
   const [sortBy, setSortBy] = useState('callsign'); // callsign, altitude, speed, icao24
+  const [altitudeHistory, setAltitudeHistory] = useState({}); // Track altitude history for each aircraft
+  const [showGraph, setShowGraph] = useState(null); // Track which aircraft graph to show
 
   // Add initial welcome message
   useEffect(() => {
@@ -46,6 +49,47 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
     
     checkAIService();
   }, []);
+
+  // Update altitude history for watchlist aircraft
+  useEffect(() => {
+    if (watchlist.length > 0) {
+      const now = new Date();
+      setAltitudeHistory(prev => {
+        const updated = { ...prev };
+        
+        watchlist.forEach(watchItem => {
+          const currentAircraft = aircraftData.find(ac => ac.icao24 === watchItem.icao24);
+          if (currentAircraft) {
+            if (!updated[watchItem.icao24]) {
+              updated[watchItem.icao24] = [];
+            }
+            
+            // Add new data point if altitude has changed or it's been more than 30 seconds
+            const lastEntry = updated[watchItem.icao24][updated[watchItem.icao24].length - 1];
+            const shouldAdd = !lastEntry || 
+              lastEntry.altitude !== currentAircraft.altitude ||
+              (now - lastEntry.timestamp) > 30000; // 30 seconds
+            
+            if (shouldAdd) {
+              updated[watchItem.icao24].push({
+                altitude: currentAircraft.altitude || 0,
+                timestamp: now,
+                velocity: currentAircraft.velocity || 0,
+                vertical_rate: currentAircraft.vertical_rate || 0
+              });
+              
+              // Keep only last 50 data points to prevent memory issues
+              if (updated[watchItem.icao24].length > 50) {
+                updated[watchItem.icao24] = updated[watchItem.icao24].slice(-50);
+              }
+            }
+          }
+        });
+        
+        return updated;
+      });
+    }
+  }, [aircraftData, watchlist]);
 
   // Filter and sort aircraft based on search term and sort criteria
   useEffect(() => {
@@ -86,9 +130,21 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         ...aircraft,
         addedAt: new Date(),
         status: 'monitoring',
-        reason: 'Manual addition'
+        reason: 'Manual addition',
+        lastAnalysis: null
       };
       setWatchlist([...watchlist, watchItem]);
+      
+      // Initialize altitude history for this aircraft
+      setAltitudeHistory(prev => ({
+        ...prev,
+        [aircraft.icao24]: [{
+          altitude: aircraft.altitude || 0,
+          timestamp: new Date(),
+          velocity: aircraft.velocity || 0,
+          vertical_rate: aircraft.vertical_rate || 0
+        }]
+      }));
       
       // Add confirmation message
       const confirmationMessage = {
@@ -110,28 +166,130 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
     setIsAnalyzing(true);
     
     try {
-      const response = await fetch('http://localhost:5002/api/ai/analyze-aircraft', {
+      // Prepare comprehensive aircraft data for AI analysis
+      const comprehensiveAircraftData = {
+        // Basic identification
+        icao24: aircraft.icao24,
+        callsign: aircraft.callsign,
+        registration: aircraft.registration,
+        
+        // Position and movement
+        latitude: aircraft.latitude,
+        longitude: aircraft.longitude,
+        altitude: aircraft.altitude,
+        velocity: aircraft.velocity,
+        heading: aircraft.heading,
+        vertical_rate: aircraft.vertical_rate,
+        on_ground: aircraft.on_ground,
+        
+        // Navigation data
+        squawk: aircraft.squawk,
+        nav_heading: aircraft.nav_heading,
+        nav_altitude_mcp: aircraft.nav_altitude_mcp,
+        nav_altitude_fms: aircraft.nav_altitude_fms,
+        nav_qnh: aircraft.nav_qnh,
+        nav_modes: aircraft.nav_modes,
+        
+        // Speed and performance
+        ias: aircraft.ias,
+        tas: aircraft.tas,
+        mach: aircraft.mach,
+        gs: aircraft.gs,
+        mag_heading: aircraft.mag_heading,
+        true_heading: aircraft.true_heading,
+        
+        // Environmental data
+        wd: aircraft.wd,
+        ws: aircraft.ws,
+        oat: aircraft.oat,
+        tat: aircraft.tat,
+        roll: aircraft.roll,
+        gps_altitude: aircraft.gps_altitude,
+        baro_rate: aircraft.baro_rate,
+        geom_rate: aircraft.geom_rate,
+        
+        // Aircraft information
+        aircraft_type: aircraft.aircraft_type,
+        category: aircraft.category,
+        wake_turb: aircraft.wake_turb,
+        manufacturer: aircraft.manufacturer,
+        model: aircraft.model,
+        typecode: aircraft.typecode,
+        year: aircraft.year,
+        engine_count: aircraft.engine_count,
+        engine_type: aircraft.engine_type,
+        
+        // Operator information
+        operator: aircraft.operator,
+        operator_icao: aircraft.operator_icao,
+        operator_iata: aircraft.operator_iata,
+        operator_callsign: aircraft.operator_callsign,
+        owner: aircraft.owner,
+        owner_icao: aircraft.owner_icao,
+        owner_iata: aircraft.owner_iata,
+        owner_callsign: aircraft.owner_callsign,
+        
+        // Status flags
+        test: aircraft.test,
+        special: aircraft.special,
+        military: aircraft.military,
+        interesting: aircraft.interesting,
+        alert: aircraft.alert,
+        emergency: aircraft.emergency,
+        silent: aircraft.silent,
+        
+        // Technical data
+        rssi: aircraft.rssi,
+        dbm: aircraft.dbm,
+        seen: aircraft.seen,
+        seen_pos: aircraft.seen_pos,
+        seen_at: aircraft.seen_at,
+        messages: aircraft.messages,
+        mlat: aircraft.mlat,
+        
+        // Origin and tracking
+        origin_country: aircraft.origin_country,
+        timestamp: aircraft.timestamp,
+        position_source: aircraft.position_source,
+        spi: aircraft.spi,
+        
+        // Altitude history for pattern analysis
+        altitude_history: altitudeHistory[aircraft.icao24] || []
+      };
+
+      const response = await fetch('http://localhost:5001/api/ai/analyze-aircraft', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          aircraft: aircraft,
+          aircraft: comprehensiveAircraftData,
           context: {
             airport: selectedAirport,
-            total_aircraft: aircraftData.length
+            total_aircraft: aircraftData.length,
+            watchlist_count: watchlist.length,
+            altitude_history: altitudeHistory[aircraft.icao24] || []
           }
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        const analysis = data.analysis;
+        const analysis = data.analysis || {};
+        
+        // Ensure analysis has required fields with defaults
+        const safeAnalysis = {
+          status: analysis.status || 'monitoring',
+          summary: analysis.summary || 'Analysis completed',
+          concerns: analysis.concerns || [],
+          recommendations: analysis.recommendations || [],
+          confidence: analysis.confidence || 0.5
+        };
         
         // Update watchlist item with analysis
         setWatchlist(prev => prev.map(item => 
           item.icao24 === aircraft.icao24 
-            ? { ...item, status: analysis.status, lastAnalysis: analysis }
+            ? { ...item, status: safeAnalysis.status, lastAnalysis: safeAnalysis }
             : item
         ));
         
@@ -139,14 +297,32 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
         const analysisMessage = {
           id: Date.now(),
           type: 'assistant',
-          content: `🧠 Analysis for ${aircraft.callsign || aircraft.icao24}:\n\nStatus: ${analysis.status}\nSummary: ${analysis.summary}\n${analysis.concerns.length > 0 ? `Concerns: ${analysis.concerns.join(', ')}\n` : ''}Confidence: ${analysis.confidence}%`,
+          content: `🧠 Analysis for ${aircraft.callsign || aircraft.icao24}:\n\nStatus: ${safeAnalysis.status}\nSummary: ${safeAnalysis.summary}\n${safeAnalysis.concerns.length > 0 ? `Concerns: ${safeAnalysis.concerns.join(', ')}\n` : ''}Confidence: ${Math.round(safeAnalysis.confidence * 100)}%`,
           timestamp: new Date()
         };
         
         setMessages(prev => [...prev, analysisMessage]);
+      } else {
+        // Handle API error
+        const errorMessage = {
+          id: Date.now(),
+          type: 'assistant',
+          content: `⚠️ Analysis failed for ${aircraft.callsign || aircraft.icao24}. Using basic monitoring.`,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, errorMessage]);
       }
     } catch (error) {
       console.error('Aircraft analysis failed:', error);
+      
+      // Add error message to chat
+      const errorMessage = {
+        id: Date.now(),
+        type: 'assistant',
+        content: `⚠️ Analysis failed for ${aircraft.callsign || aircraft.icao24}: ${error.message || 'Unknown error'}. Using basic monitoring.`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     }
     
     setIsAnalyzing(false);
@@ -501,12 +677,12 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                       </div>
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center space-x-2">
-                          <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(aircraft.status)}`}>
-                            {aircraft.status}
+                          <span className={`px-2 py-1 text-xs rounded border ${getStatusColor(aircraft.status || 'monitoring')}`}>
+                            {aircraft.status || 'monitoring'}
                           </span>
                           {aircraft.lastAnalysis && (
                             <span className="text-xs text-gray-500">
-                              {aircraft.lastAnalysis.confidence}% confidence
+                              {Math.round((aircraft.lastAnalysis.confidence || 0.5) * 100)}% confidence
                             </span>
                           )}
                         </div>
@@ -514,13 +690,25 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                           {aircraft.addedAt.toLocaleTimeString()}
                         </span>
                       </div>
-                      {aircraft.lastAnalysis && aircraft.lastAnalysis.concerns.length > 0 && (
+                      {aircraft.lastAnalysis && aircraft.lastAnalysis.concerns && aircraft.lastAnalysis.concerns.length > 0 && (
                         <div className="mt-2 text-xs text-yellow-400">
                           ⚠️ {aircraft.lastAnalysis.concerns.join(', ')}
                         </div>
                       )}
                     </div>
                     <div className="flex items-center space-x-1 ml-3">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowGraph(showGraph === aircraft.icao24 ? null : aircraft.icao24);
+                        }}
+                        className="p-1 text-gray-400 hover:text-green-400 transition-colors"
+                        title="Show altitude history graph"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -547,6 +735,32 @@ const WatchlistTab = ({ aircraftData, selectedAirport }) => {
                       </button>
                     </div>
                   </div>
+                  
+                  {/* Altitude History Graph */}
+                  {showGraph === aircraft.icao24 && altitudeHistory[aircraft.icao24] && (
+                    <div className="mt-3 p-3 bg-gray-900/50 rounded border border-gray-600">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="text-sm font-medium text-gray-300">Altitude History</h4>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowGraph(null);
+                          }}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="h-32 bg-gray-800 rounded p-2">
+                        <AltitudeHistoryChart 
+                          data={altitudeHistory[aircraft.icao24]} 
+                          aircraft={aircraft}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))
             )}

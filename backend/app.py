@@ -1068,5 +1068,8 @@ if __name__ == '__main__':
     # Log system ready
     logging_service.log(LogLevel.INFO, "system", "ATC System ready")
     
+    # Check if running in production
+    debug_mode = os.environ.get('FLASK_ENV') != 'production'
+    
     # Run with SocketIO
-    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=debug_mode, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)

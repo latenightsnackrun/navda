@@ -130,12 +130,17 @@ class CerebrasAIService:
         analysis_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an expert ATC analyst AI. Analyze aircraft behavior and provide detailed assessments.
             
-            Your analysis should consider:
-            - Altitude patterns and deviations
-            - Speed consistency and variations  
-            - Heading changes and flight path
-            - Vertical rate anomalies
-            - Communication patterns
+            Your analysis should consider ALL available aircraft data:
+            - Position and movement (lat/lon, altitude, velocity, heading, vertical_rate)
+            - Navigation data (squawk, nav_heading, nav_altitude_mcp/fms, nav_qnh, nav_modes)
+            - Speed and performance (ias, tas, mach, gs, mag_heading, true_heading)
+            - Environmental data (wind direction/speed, outside air temp, roll, gps_altitude, baro/geom_rate)
+            - Aircraft information (type, category, wake_turb, manufacturer, model, year, engine_count/type)
+            - Operator data (operator, owner, icao/iata codes, callsigns)
+            - Status flags (test, special, military, interesting, alert, emergency, silent)
+            - Technical data (rssi, dbm, seen timestamps, messages, mlat)
+            - Altitude history patterns and trends
+            - Communication patterns and squawk codes
             - Weather and traffic context
             
             Respond in valid JSON format only."""),
@@ -160,13 +165,24 @@ class CerebrasAIService:
         query_prompt = ChatPromptTemplate.from_messages([
             ("system", """You are an intelligent ATC query processor. Parse natural language queries about aircraft data and provide structured responses.
             
-            Query types you handle:
-            - Aircraft filtering ("show flights above 30000ft")
-            - Pattern analysis ("find unusual behavior") 
-            - Summaries ("generate watchlist summary")
-            - Alerts ("critical aircraft")
+            You have access to comprehensive aircraft data including:
+            - Position, altitude, speed, heading, vertical rate
+            - Navigation data (squawk, nav modes, altitude settings)
+            - Performance data (IAS, TAS, Mach, ground speed)
+            - Environmental data (wind, temperature, roll)
+            - Aircraft details (type, manufacturer, operator, year)
+            - Status flags (emergency, military, special, alert)
+            - Technical data (signal strength, message counts)
+            - Altitude history and patterns
             
-            Always provide actionable ATC insights."""),
+            Query types you handle:
+            - Aircraft filtering ("show flights above 30000ft", "find military aircraft")
+            - Pattern analysis ("find unusual behavior", "detect altitude deviations") 
+            - Summaries ("generate watchlist summary", "analyze traffic patterns")
+            - Alerts ("critical aircraft", "emergency situations")
+            - Performance analysis ("analyze climb rates", "check speed consistency")
+            
+            Always provide actionable ATC insights based on ALL available data."""),
             ("user", """Process this query about aircraft data:
             
             Query: {query}

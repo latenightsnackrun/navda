@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: navda-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CEREBRAS_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: CESIUM_ION_TOKEN
+        sync: false
+    healthCheckPath: /api/health
+    disk:
+      name: navda-backend-disk
+      mountPath: /opt/render/project/src
+      sizeGB: 1
