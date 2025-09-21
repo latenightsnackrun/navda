@@ -1,4 +1,10 @@
 {
+  "name": "navda",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd main && npm install && npm run build",
+    "dev": "cd main && npm install && npm run dev"
+  },
   "dependencies": {
     "@auth0/auth0-react": "^2.5.0",
     "@cerebras/cerebras_cloud_sdk": "^1.50.0",

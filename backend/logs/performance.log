@@ -566,3 +566,7 @@
 2025-09-21 01:00:56,785 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
 2025-09-21 01:00:56,788 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
 2025-09-21 01:00:56,791 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 01:04:52,506 - avivato_atc - INFO - system - Starting ATC System on port 5001 | {"component": "system", "correlation_id": null, "data": null}
+2025-09-21 01:04:52,506 - avivato_atc.agent_coordinator - INFO - agent_coordinator - Agent coordination started | {"component": "agent_coordinator", "correlation_id": null, "data": null}
+2025-09-21 01:04:52,508 - avivato_atc.websocket_service - INFO - websocket_service - Real-time monitoring started | {"component": "websocket_service", "correlation_id": null, "data": null}
+2025-09-21 01:04:52,509 - avivato_atc - INFO - system - ATC System ready | {"component": "system", "correlation_id": null, "data": null}
