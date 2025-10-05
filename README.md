@@ -1,4 +1,10 @@
 ## Navda
+<div align="center">
+  <h3>🏆 Best AR/VR Hack at PennApps 2025 🏆</h3>
+  <p><em>AI + automation tools for Air Traffic Control</em></p>
+</div>
+
+---
 
 <div align="center">
   <img src="navda_3D_view.gif" alt="Tech Stack" />
